@@ -9,8 +9,8 @@
 
 | 项目 | 阶段 | 状态 | 目录 |
 |---|---|---|---|
-| AI Dev Workflow Kit | M1 W1 | Building | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
-| DB Demo Studio | 独立学习项目 | Phase 0 — 文档就绪 | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
+| AI Dev Workflow Kit | M1 W1 | Building — 5 prompt 模板就绪，含 DeepSeek 审查脚本 | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
+| DB Demo Studio | M1 W1 | **Phase 1 — 架构 v2 就绪，PoC 编码中** | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
 | Paper RAG Assistant | M1 W2-4 | Not Started | `06_RAG_Research_Assistant/` |
 | Personal MCP Server | M2 W5-6 | Not Started | `07_MCP_Server/` |
 | Mini Agent Framework | M2 W7-8 | Not Started | `08_Mini_Agent_Framework/` |
@@ -65,5 +65,7 @@ Commit 规范见 [`00_Roadmap/git_workflow.md`](00_Roadmap/git_workflow.md)。
 <!-- 随进度更新 -->
 - 开始日期：2026-05-27
 - 目标完成：2026-08-27（3 个月）
-- Commits：初始化中
-- Daily Logs：1
+- Commits：4
+- Daily Logs：2（Day1: 2026-05-27 / Day2: 2026-05-28）
+- 当前进度：Day 3 / W1 — PoC #1 编码中
+- 使用记录：2 / 5

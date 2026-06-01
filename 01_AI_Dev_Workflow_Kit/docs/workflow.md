@@ -1,8 +1,9 @@
 # 我的 AI 辅助开发工作流
 
-> 版本：v0.2（2026-05-27）  
+> 版本：v0.3（2026-06-01）  
 > 原则：AI 是协作者，不是替代者。每个环节都有人工校验点。  
-> API：仅 DeepSeek → 见 `00_Roadmap/learning_constraints.md`
+> API：仅 DeepSeek → 见 `00_Roadmap/learning_constraints.md`  
+> Phase 1 实战主代码库：`02_DB_Demo_Studio/` — DB Demo Studio（数据库课演示生产工具）
 
 ---
 
@@ -57,9 +58,14 @@ python scripts/ai_commit_review.py --unstaged
 
 # 4. 提交前自检清单
 # - [ ] AI 生成的代码我逐行看过
-# [ ] 测试全部通过
+# - [ ] 测试全部通过
 # - [ ] 没有提交 secrets / 调试代码
 # - [ ] commit message 清晰
+
+# 5. DeepSeek 配置步骤（首次）
+pip install openai python-dotenv
+copy .env.example .env   # 填入真实 Key（.env 不进 git）
+python scripts/ai_commit_review.py --help
 ```
 
 ---
@@ -83,12 +89,15 @@ python scripts/ai_commit_review.py --unstaged
 
 ---
 
-## 当前版本状态（v0.2）
+## 当前版本状态（v0.3）
 
 - [x] `ai_commit_review.py` 已接入 DeepSeek API
 - [x] Docker 运行支持
-- [ ] Prompt 模板全部完成实战验证
-- 真实使用记录：**1 / 5**（目标 >= 5）
+- [x] Prompts 模板：requirements / architecture / code_review 已实战（2/5）
+- [ ] Prompts 模板：debug / refactor 待实战
+- 真实使用记录：**2 / 5**（目标 >= 5）
+- **Phase 1 主代码库：** `02_DB_Demo_Studio/`
+- **AI 工作流详设：** 已沉淀到 `02_DB_Demo_Studio/docs/ai-workflow.md`
 
 ---
 

@@ -6,7 +6,7 @@
 | 字段 | 值 |
 |---|---|
 | **项目代号** | `db_demo_video` / DB Demo Studio |
-| **状态** | Phase 0 — AI 架构 v2 就绪，待 PoC |
+| **状态** | Phase 1 — PoC #1 编码中（demo-schema 定义 + 样例 JSON） |
 | **代码根目录** | 本目录 `02_DB_Demo_Studio/` |
 
 ---

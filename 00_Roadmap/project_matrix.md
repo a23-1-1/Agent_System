@@ -7,7 +7,7 @@
 
 | 项目 | Phase | 状态 | 当前任务 | 下一个里程碑 | 产出物 |
 |---|---|---|---|---|---|
-| **DB Demo Studio** | Phase 1 实战代码库 | **Building** | PoC #1：DemoPackage 样例 + Player | `demo-schema` + 浏览器逐步播放 | 演示工具 monorepo |
+| **DB Demo Studio** | Phase 1 实战代码库 | **Building** | PoC #1：DemoPackage Schema + 样例 JSON + 校验 | Runner Player 骨架 | 演示工具 monorepo |
 | AI Dev Workflow Kit | Phase 1 工具包 | Building | Prompt 模板 + workflow 定稿 | 5 条使用记录 + workflow v1 | 模板 + 可选审查脚本 |
 | Paper RAG Assistant | Phase 2 | Not Started | — | PDF 解析模块 | Demo |
 | Personal MCP Server | Phase 3 | Not Started | — | 实现第一个 tool | MCP Server |

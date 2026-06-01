@@ -58,33 +58,35 @@
 
 > **2026-06-01 起：** Phase 1 主代码库切换为 `02_DB_Demo_Studio`。新 Day 1 任务见 [`day1_guide.md`](day1_guide.md)。
 
-### Day 2 — 场景 + 架构 Prompt（DB Demo Studio）
+### Day 2（2026-05-28）— 场景 + 架构 Prompt ✅
 
-> 详细流程：[`day2_2026-05-28_guide.md`](day2_2026-05-28_guide.md)（已对齐 Studio 主线）
+> 详细流程：[`day2_2026-05-28_guide.md`](day2_2026-05-28_guide.md)
 
-- [ ] 整理 `scenarios.md`（案例指向 DB Demo Studio）
-- [ ] 用 `prompts/architecture.md` 细化 `demo-schema` / PoC 模块划分
-- [ ] 第 2 条使用记录 → `02_DB_Demo_Studio/logs/`
+- [x] 整理 `scenarios.md`（案例指向 DB Demo Studio）
+- [x] 用 `prompts/architecture.md` 细化 `ai-orchestrator` / 模块划分
+- [x] 第 2 条使用记录 → `02_DB_Demo_Studio/logs/2026-06-01_day2_ai_orchestrator_architecture.md`
 
-### Day 3 — 编码闭环
+### Day 3（2026-06-01）— 编码闭环：PoC #1 ⭐
 
-- [ ] 完成 `prompts/code_review.md` 实战（审查 PoC 代码）
-- [ ] 实现：样例 JSON 校验 **或** 最小 Player 骨架
+- [ ] 补 Day 2 遗留：`workflow.md` v0.3 + 概念卡（agent / mcp / skill）
+- [ ] 定义 `packages/demo-schema/schema.json`（DemoPackage JSON Schema）
+- [ ] 手写 JOIN 5 步样例 `examples/join-query.json`
+- [ ] 校验 schema / 样例 JSON
 - [ ] 第 3 条使用记录
 
-### Day 4 — Debug
+### Day 4 — Debug / Player 骨架
 
-- [ ] `prompts/debug.md` 实战（Player/Schema 真实问题）
+- [ ] `prompts/debug.md` 实战（Schema 校验问题 / 边界情况）
 - [ ] 第 4 条使用记录
 
-### Day 5 — Code Review 工具（可选）
+### Day 5 — Player 前端 + 整合
 
-- [ ] `python scripts/ai_commit_review.py --unstaged`（在仓库根或 Kit 目录，审查 `02_DB_Demo_Studio/` 变更）
-- [ ] 第 5 条使用记录（可与 D3/D4 合并计数）
+- [ ] 最小 Execution Player（支持 ←/→/空格步进，≥3 步手动 JSON）
+- [ ] `python scripts/ai_commit_review.py --unstaged` 审查 Studio 变更
+- [ ] 第 5 条使用记录
 
 ### Day 6 — 整合
 
-- [ ] 完善 `docs/workflow.md`（Studio 为主路径）
 - [ ] 更新 `02_DB_Demo_Studio/README.md` + 根 `README.md`
 - [ ] 概念笔记：Agent / MCP / Skill
 

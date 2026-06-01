@@ -43,9 +43,9 @@ M3 (W9-W12)  Coding Agent → 整合 + 作品集
 | 天 | 任务 | 产出 |
 |---|---|---|
 | D1-D2 | Prompt 实战（需求/架构）+ `scenarios.md` | 模板验证 + Studio `logs/` |
-| D3-D4 | **PoC #1**：DemoPackage JSON + Player 步进 | `02_DB_Demo_Studio/` commit |
+| **D3-D4** | **PoC #1**：DemoPackage JSON Schema + 样例 + 校验 | `02_DB_Demo_Studio/packages/demo-schema/` |
 | D5 | 可选 `ai_commit_review.py` 审查 Studio diff | 审查报告 |
-| D6-D7 | `workflow.md` + README + 阶段复盘 | Kit v1 + Studio PoC 可演示 |
+| D6-D7 | Player 骨架 / `workflow.md` + README + 阶段复盘 | Studio PoC 可演示 |
 
 **验收**：5 条使用记录 + PoC #1 可演示 + 3 分钟能讲 AI 在 Studio 开发中的作用
 

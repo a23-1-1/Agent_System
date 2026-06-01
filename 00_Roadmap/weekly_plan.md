@@ -1,7 +1,7 @@
 # Weekly Plan - 2026-W22
 
 > 周期：2026-05-26 ~ 2026-06-01（W1 可延续至 2026-06-02 周复盘）  
-> 总目标：**3 个月完成 12 个月全部内容** → [`3month_full_plan.md`](3month_full_plan.md)  
+> 总目标：**12 周完成完整路线图** → [`3month_plan.md`](3month_plan.md)  
 > **Phase 1 实战代码库：** [`02_DB_Demo_Studio/`](../02_DB_Demo_Studio/)  
 > **工作流工具包：** [`01_AI_Dev_Workflow_Kit/`](../01_AI_Dev_Workflow_Kit/)  
 > 今日指南 → Day 1 [`day1_guide.md`](day1_guide.md) · 历史 [`day1_2026-05-27_workflow.md`](day1_2026-05-27_workflow.md) · Day 2 [`day2_2026-05-28_guide.md`](day2_2026-05-28_guide.md)  
@@ -94,7 +94,7 @@
 
 - [ ] 写 `2026-W22.md`（或当前周）周复盘
 - [ ] 更新 `project_matrix.md`
-- [ ] Phase 1 七项验收自检（见 `3month_full_plan.md`）
+- [ ] Phase 1 七项验收自检（见 `3month_plan.md`）
 
 ---
 

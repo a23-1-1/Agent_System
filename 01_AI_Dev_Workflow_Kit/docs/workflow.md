@@ -103,7 +103,7 @@ python scripts/ai_commit_review.py --help
 
 ## 下一步
 
-1. 完成 5 个 Prompt 模板
-2. 选一个小功能走完整闭环
-3. 积累 5 条真实使用记录
-4. 写阶段复盘
+1. 完成 5 个 Prompt 模板（已完成 2/5）
+2. Day 3-4：完成 PoC #1 demo-schema + Player 编码
+3. 积累 5 条真实使用记录（当前 2/5）
+4. W2 开始 Phase 2 — Paper RAG Assistant

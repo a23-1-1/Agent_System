@@ -9,12 +9,13 @@
 
 | 项目 | 阶段 | 状态 | 目录 |
 |---|---|---|---|
-| AI Dev Workflow Kit | M1 W1 | Building — 5 prompt 模板就绪，含 DeepSeek 审查脚本 | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
-| DB Demo Studio | M1 W1 | **Phase 1 — 架构 v2 就绪，PoC 编码中** | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
-| Paper RAG Assistant | M1 W2-4 | Not Started | `06_RAG_Research_Assistant/` |
-| Personal MCP Server | M2 W5-6 | Not Started | `07_MCP_Server/` |
-| Mini Agent Framework | M2 W7-8 | Not Started | `08_Mini_Agent_Framework/` |
-| Coding Agent Demo | M3 W9 | Not Started | `09_Coding_Agent/` |
+| AI Dev Workflow Kit | **W1** | Building | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
+| DB Demo Studio | **W1** | Phase 1 — PoC #1 编码中 | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
+| Paper RAG Assistant | **W2-4** | Not Started | `06_RAG_Research_Assistant/` |
+| Personal MCP Server | **W5-6** | Not Started | `07_MCP_Server/` |
+| Mini Agent Framework | **W7-9** | Not Started | `08_Mini_Agent_Framework/` |
+| Skill & Multi-Agent | **W10** | Not Started | `10_Skill_Multi_Agent/` |
+| AI Research Copilot | **W11** | Not Started | `11_AI_Research_Copilot/` |
 
 详细计划见 [`00_Roadmap/3month_plan.md`](00_Roadmap/3month_plan.md)。
 
@@ -29,11 +30,13 @@ Agent_System/
   00_Notes/             概念笔记、论文笔记、实验记录
   00_Portfolio/         简历、面试故事、Demo 索引
   01_AI_Dev_Workflow_Kit/
-  02_DB_Demo_Studio/           数据库课演示工具（独立学习项目）
-  06_RAG_Research_Assistant/   (M1 创建)
-  07_MCP_Server/               (M2 创建)
-  08_Mini_Agent_Framework/     (M2 创建)
-  09_Coding_Agent/             (M3 创建)
+  02_DB_Demo_Studio/           数据库课演示工具（W1 PoC）
+  06_RAG_Research_Assistant/   (W2 创建)
+  07_MCP_Server/               (W5 创建)
+  08_Mini_Agent_Framework/     (W7 创建)
+  09_Coding_Agent/             (W9 创建)
+  10_Skill_Multi_Agent/        (W10 创建)
+  11_AI_Research_Copilot/      (W11 创建)
 ```
 
 ---

@@ -907,7 +907,9 @@ Agent_System/
 
 ---
 
-## 9. 第一阶段启动计划
+## 9. 第一阶段启动计划（已归档）
+
+> 以下 Week 1-4 为原始模板，实际执行请参照 [`00_Roadmap/3month_plan.md`](00_Roadmap/3month_plan.md) 的 W1-W12 加速路线。
 
 ## Week 1：建立 AI 学习管理系统
 

@@ -57,10 +57,12 @@ Agent_System/          ← 一个 Git 仓库
 ├── 00_Notes/          ← 概念笔记、论文笔记
 ├── 00_Portfolio/      ← 简历、面试材料
 ├── 01_AI_Dev_Workflow_Kit/
-├── 06_RAG_Research_Assistant/   ← M1 创建
-├── 07_MCP_Server/               ← M2 创建
-├── 08_Mini_Agent_Framework/     ← M2 创建
-└── 09_Coding_Agent/             ← M3 创建
+├── 06_RAG_Research_Assistant/   ← W2 创建
+├── 07_MCP_Server/               ← W5 创建
+├── 08_Mini_Agent_Framework/     ← W7 创建
+├── 09_Coding_Agent/             ← W9 创建
+├── 10_Skill_Multi_Agent/        ← W10 创建
+└── 11_AI_Research_Copilot/      ← W11 创建
 ```
 
 **不需要**为每个 Phase 开分支——你的 commit message 已经标记阶段。

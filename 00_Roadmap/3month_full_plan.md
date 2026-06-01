@@ -1,10 +1,7 @@
-# 3 个月加速计划（12 个月内容完整版）
+# 3 个月加速计划（12 个月内容完整版 — 已归档）
 
-> **原则：学习内容不减、验收标准不降，只压缩时间。**  
-> 时间：2026-05-27 → 2026-08-27（12 周）  
-> 强度：工作日 3-4h/天，周末 6-8h/天  
-> 完整路线图：[`AI_Developer_Research_Roadmap.md`](../AI_Developer_Research_Roadmap.md)  
-> 管理规范：[`AI_Learning_Management_Plan.md`](../AI_Learning_Management_Plan.md)
+> ⚠️ **本文件已归档。** 实际执行请见[新版 3 个月计划](3month_plan.md)，内容更新为 W1-W12 完整加速路线。  
+> 本文件保留 12 个月全量内容不缩水的原始版本作为参考。
 
 ---
 

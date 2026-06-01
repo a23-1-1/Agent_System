@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB Demo Player — PoC #1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f5; color: #1a1a1a; display: flex; justify-content: center;
+    padding: 2rem 1rem; min-height: 100vh;
+  }
+  .player {
+    max-width: 820px; width: 100%; background: #fff; border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08); overflow: hidden;
+  }
+
+  /* ── header ── */
+  .header { padding: 1.5rem 2rem .5rem; }
+  .header h1 { font-size: 1.3rem; font-weight: 600; }
+  .header .meta { font-size: .85rem; color: #666; margin-top: 4px; }
+
+  /* ── progress bar ── */
+  .progress-wrap { padding: 1rem 2rem 0; }
+  .progress-bar {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .progress-dot {
+    flex: 1; height: 6px; border-radius: 4px; background: #e0e0e0;
+    transition: background .25s; cursor: pointer;
+  }
+  .progress-dot.active { background: #2563eb; }
+  .progress-dot.current { background: #3b82f6; box-shadow: 0 0 0 2px #93bbfd; }
+  .step-label {
+    display: flex; justify-content: space-between; font-size: .75rem;
+    color: #999; margin-top: 6px;
+  }
+  .step-label span.current-step { color: #2563eb; font-weight: 600; }
+
+  /* ── phase badge ── */
+  .phase-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: .8rem; font-weight: 500; margin: 1rem 2rem 0;
+    background: #eff6ff; color: #1d4ed8;
+  }
+
+  /* ── narration ── */
+  .narration {
+    padding: 1rem 2rem 1.5rem; font-size: 1rem; line-height: 1.7; min-height: 120px;
+    color: #333;
+  }
+  .narration .empty-hint { color: #bbb; font-style: italic; }
+
+  /* ── controls ── */
+  .controls {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    padding: 1rem 2rem; border-top: 1px solid #eee;
+  }
+  .controls button {
+    background: #f0f0f0; border: none; font-size: 1.2rem; width: 44px; height: 44px;
+    border-radius: 50%; cursor: pointer; transition: .15s;
+    display: flex; align-items: center; justify-content: center;
+    color: #333;
+  }
+  .controls button:hover { background: #e0e0e0; }
+  .controls button:active { background: #d0d0d0; }
+  .controls button:disabled { opacity: .3; cursor: default; }
+  .controls .play-btn { background: #2563eb; color: #fff; width: 52px; height: 52px; }
+  .controls .play-btn:hover { background: #1d4ed8; }
+  .controls .counter { font-size: .85rem; color: #666; min-width: 60px; text-align: center; }
+
+  /* ── keyboard hint ── */
+  .kbd-hint { text-align: center; font-size: .75rem; color: #bbb; padding: 0 2rem .8rem; }
+  kbd {
+    display: inline-block; padding: 1px 6px; font-size: .7rem;
+    background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px;
+    font-family: inherit;
+  }
+</style>
+</head>
+<body>
+
+<div class="player" id="app">
+  <div class="header">
+    <h1 id="title">INNER JOIN 查询执行过程</h1>
+    <div class="meta">6 步 · DemoPackage · <span id="phaseCount"></span></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="step-label">
+      <span>步骤 <span id="stepNum">1</span> / <span id="totalSteps">6</span></span>
+      <span class="current-step" id="phaseLabel">lex 词法分析</span>
+    </div>
+  </div>
+
+  <div class="phase-badge" id="phaseBadge">lex</div>
+
+  <div class="narration" id="narration">
+    <span class="empty-hint">← 按右箭头或空格开始播放</span>
+  </div>
+
+  <div class="controls">
+    <button id="btnPrev" title="上一步 (←)" disabled>&larr;</button>
+    <button class="play-btn" id="btnPlay" title="播放 / 暂停 (Space)">&#9654;</button>
+    <button id="btnNext" title="下一步 (→)" disabled>&rarr;</button>
+    <span class="counter" id="counter">1 / 6</span>
+  </div>
+
+  <div class="kbd-hint">
+    <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 切换步 &middot; <kbd>Space</kbd> 自动播放
+  </div>
+</div>
+
+<script>
+// ── 内嵌 DemoPackage ──────────────────────────────────────────────
+const DEMO = {
+  "id": "dp_20260601_join",
+  "title": { "zh": "INNER JOIN 查询执行过程", "en": "INNER JOIN Query Execution Process" },
+  "steps": [
+    {
+      "id": "step_1", "order": 1, "workflowPhase": "lex",
+      "narration": {
+        "zh": "数据库首先对 SQL 语句进行词法分析（Lexical Analysis）。它将 SQL 文本拆分成一个个 Token——关键字 SELECT、表名 students、JOIN 关键字、courses 等。这一步检查每个单词是否合法，比如表名 students 是否存在。",
+        "en": "The database performs lexical analysis on the SQL statement, breaking it into tokens."
+      },
+      "visuals": { "type": "highlight-sql", "highlightRange": [0, 10] }
+    },
+    {
+      "id": "step_2", "order": 2, "workflowPhase": "parse",
+      "narration": {
+        "zh": "词法分析通过后，进入语法分析（Parsing）。数据库根据 SQL 语法规则生成一棵语法树（AST）。例如，它识别出这是一个 SELECT 查询，FROM 子句包含一个 JOIN 操作，ON 条件是 students.id = courses.student_id。如果 SQL 语法有误，这一步就会失败。",
+        "en": "After lexical analysis, the database generates an Abstract Syntax Tree (AST) based on SQL grammar rules."
+      },
+      "visuals": { "type": "highlight-sql", "highlightRange": [11, 65] }
+    },
+    {
+      "id": "step_3", "order": 3, "workflowPhase": "optimize",
+      "narration": {
+        "zh": "语法分析后，优化器开始工作（Query Optimization）。MySQL 优化器会分析多种 JOIN 执行策略：Nested Loop Join、Hash Join、Index Join 等，基于表统计信息（行数、索引选择性）估算每种策略的成本，选择成本最低的方案。对于这个小数据集，优化器选择了 Index Join。",
+        "en": "The optimizer analyzes multiple JOIN strategies (Nested Loop, Hash Join, Index Join) and selects the cheapest plan based on table statistics."
+      },
+      "visuals": { "type": "highlight-sql", "highlightRange": [0, 100] }
+    },
+    {
+      "id": "step_4", "order": 4, "workflowPhase": "plan",
+      "narration": {
+        "zh": "优化器确定执行计划后，通过 MySQL 的 EXPLAIN 可以看到具体细节：数据库选择了「Index Join」方式——先扫描 students 表（索引），再对每行去 courses 表查找匹配记录。这条计划的预估行数是 5 行，成本（cost）为 1.75。",
+        "en": "MySQL's EXPLAIN reveals the plan: 'Index Join' — scan the students table index, then look up matching rows in courses. Estimated rows: 5, cost: 1.75."
+      },
+      "visuals": { "type": "plan-tree" }
+    },
+    {
+      "id": "step_5", "order": 5, "workflowPhase": "execute",
+      "narration": {
+        "zh": "数据库按照执行计划逐步执行。先访问 students 表的主键索引，读取所有行（共 3 行）。对于每一行，通过索引查找 courses 表中 student_id 匹配的记录。这个过程中，数据库会涉及缓冲池（Buffer Pool）的读操作、索引树的遍历比较等底层操作。",
+        "en": "The database executes the plan: accessing the primary key index of students (3 rows), then looking up matching records in courses for each row."
+      },
+      "visuals": { "type": "table-result" }
+    },
+    {
+      "id": "step_6", "order": 6, "workflowPhase": "result",
+      "narration": {
+        "zh": "执行完成，数据库返回最终结果集。INNER JOIN 只返回两表匹配的行——这里只有 2 行数据（student_1 选了 course_A 和 course_B）。如果某学生在 courses 表中没有选课记录，就不会出现在结果中。在 MySQL 的 Join Buffer 中，这一过程还涉及了 Join Buffer 的使用和内存管理。",
+        "en": "Execution complete. INNER JOIN returns only matched rows — here, 2 rows (student_1 enrolled in course_A and course_B)."
+      },
+      "visuals": { "type": "table-result" }
+    }
+  ],
+  "playback": { "defaultStepDurationMs": 5000 }
+};
+
+// ── Player 状态 ──────────────────────────────────────────────────
+const PHASE_LABELS = {
+  lex: '词法分析', parse: '语法分析', optimize: '查询优化',
+  plan: '执行计划', execute: '执行过程', result: '结果集',
+  concept: '概念', transform: '变换', compare: '对比', summary: '总结'
+};
+
+const player = {
+  current: 0,
+  playing: false,
+  timer: null,
+  steps: DEMO.steps,
+};
+
+const $ = id => document.getElementById(id);
+
+// ── 渲染 ──────────────────────────────────────────────────────────
+function render() {
+  const { steps, current } = player;
+  if (!steps.length) return;
+
+  const s = steps[current];
+
+  // header
+  const phases = [...new Set(steps.map(x => x.workflowPhase))];
+  $('phaseCount').textContent = phases.join(' → ');
+  $('totalSteps').textContent = steps.length;
+
+  // progress bar
+  $('progressBar').innerHTML = steps.map((step, i) =>
+    `<div class="progress-dot ${i < current ? 'active' : ''} ${i === current ? 'current' : ''}" data-idx="${i}"></div>`
+  ).join('');
+
+  // step label
+  $('stepNum').textContent = current + 1;
+  const label = PHASE_LABELS[s.workflowPhase] || s.workflowPhase;
+  $('phaseLabel').textContent = `${s.workflowPhase} ${label}`;
+
+  // phase badge
+  $('phaseBadge').textContent = `${s.workflowPhase} — ${label}`;
+
+  // narration
+  $('narration').innerHTML = s.narration.zh;
+
+  // counter
+  $('counter').textContent = `${current + 1} / ${steps.length}`;
+
+  // buttons
+  $('btnPrev').disabled = current === 0;
+  $('btnNext').disabled = current === steps.length - 1;
+  $('btnPlay').innerHTML = player.playing ? '&#9646;&#9646;' : '&#9654;';
+
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 导航 ──────────────────────────────────────────────────────────
+function goTo(idx) {
+  const max = player.steps.length - 1;
+  player.current = Math.max(0, Math.min(idx, max));
+  render();
+}
+
+function prev() { if (player.current > 0) { stop(); goTo(player.current - 1); } }
+function next() { if (player.current < player.steps.length - 1) { stop(); goTo(player.current + 1); } }
+
+function togglePlay() {
+  if (player.playing) { stop(); } else { start(); }
+}
+
+function start() {
+  if (player.current >= player.steps.length - 1) goTo(0);
+  player.playing = true;
+  const ms = DEMO.playback?.defaultStepDurationMs || 5000;
+  player.timer = setInterval(() => {
+    if (player.current >= player.steps.length - 1) { stop(); return; }
+    goTo(player.current + 1);
+  }, ms);
+  render();
+}
+
+function stop() {
+  player.playing = false;
+  if (player.timer) { clearInterval(player.timer); player.timer = null; }
+  render();
+}
+
+// ── 事件绑定 ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  goTo(0);
+
+  $('btnPrev').addEventListener('click', prev);
+  $('btnNext').addEventListener('click', next);
+  $('btnPlay').addEventListener('click', togglePlay);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    switch (e.key) {
+      case 'ArrowLeft':  e.preventDefault(); prev(); break;
+      case 'ArrowRight': e.preventDefault(); next(); break;
+      case ' ':          e.preventDefault(); togglePlay(); break;
+    }
+  });
+
+  // 点击进度条跳转
+  $('progressBar').addEventListener('click', e => {
+    const dot = e.target.closest('.progress-dot');
+    if (dot && dot.dataset.idx !== undefined) {
+      stop(); goTo(parseInt(dot.dataset.idx));
+    }
+  });
+});
+</script>
+</body>
+</html>

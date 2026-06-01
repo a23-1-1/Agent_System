@@ -18,7 +18,7 @@
 **我的 Prompt 模板**：`prompts/requirements.md`
 
 **使用记录**：
-<!-- 实战后追加，格式：- 2026-05-27：做了 xxx → 见 logs/xxx.md -->
+- 2026-06-01：PoC #1 DemoPackage Schema 需求澄清 → `02_DB_Demo_Studio/logs/2026-06-01_poc1_requirements.md`
 **我的真实案例**：我使用AI开发智能课堂助手的智能备课功能
 **预期 AI 帮助**：AI可以帮助我设计功能细节，深度挖掘AI在备课功能上的提升效果，并且帮助开发前后端
 **人工校验点**：登录系统功能正常使用，有创新，AI功能深度挖掘大大提升教师备课效率

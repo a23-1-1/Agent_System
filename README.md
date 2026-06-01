@@ -1,7 +1,6 @@
 # Agent System
 
-> 3 个月项目驱动学习：AI 工作流 → RAG → MCP → Agent → Coding Agent  
-> 学习历程全程 Git 追踪，形成可展示的作品集。
+> 6 个项目 × 2 周：DB Demo Studio → Paper RAG → MCP Server → Agent Framework → Coding Agent → Portfolio
 
 ---
 
@@ -9,13 +8,13 @@
 
 | 项目 | 阶段 | 状态 | 目录 |
 |---|---|---|---|
-| AI Dev Workflow Kit | **W1** | Building | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
-| DB Demo Studio | **W1** | Phase 1 — PoC #1 编码中 | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
-| Paper RAG Assistant | **W2-4** | Not Started | `06_RAG_Research_Assistant/` |
-| Personal MCP Server | **W5-6** | Not Started | `07_MCP_Server/` |
-| Mini Agent Framework | **W7-9** | Not Started | `08_Mini_Agent_Framework/` |
-| Skill & Multi-Agent | **W10** | Not Started | `10_Skill_Multi_Agent/` |
-| AI Research Copilot | **W11** | Not Started | `11_AI_Research_Copilot/` |
+| AI Dev Workflow Kit | W1-W2 | Building | 01_AI_Dev_Workflow_Kit/ |
+| DB Demo Studio | **W1-W2** | Building - Step 2 | 02_DB_Demo_Studio/ |
+| Paper RAG Assistant | W3-W4 | Not Started | 06_RAG_Research_Assistant/ |
+| Personal MCP Server | W5-W6 | Not Started | 07_MCP_Server/ |
+| Mini Agent Framework | W7-W8 | Not Started | 08_Mini_Agent_Framework/ |
+| Coding Agent Demo | W9-W10 | Not Started | 09_Coding_Agent/ |
+| Portfolio + Extensions | W11-W12 | Not Started | 00_Portfolio/ |
 
 详细计划见 [`00_Roadmap/3month_plan.md`](00_Roadmap/3month_plan.md)。
 
@@ -30,13 +29,12 @@ Agent_System/
   00_Notes/             概念笔记、论文笔记、实验记录
   00_Portfolio/         简历、面试故事、Demo 索引
   01_AI_Dev_Workflow_Kit/
-  02_DB_Demo_Studio/           数据库课演示工具（W1 PoC）
-  06_RAG_Research_Assistant/   (W2 创建)
+  02_DB_Demo_Studio/           数据库课演示工具（W1-W2）
+  06_RAG_Research_Assistant/   (W3 创建)
   07_MCP_Server/               (W5 创建)
   08_Mini_Agent_Framework/     (W7 创建)
   09_Coding_Agent/             (W9 创建)
-  10_Skill_Multi_Agent/        (W10 创建)
-  11_AI_Research_Copilot/      (W11 创建)
+  10_Portfolio/                (W11 创建)
 ```
 
 ---
@@ -68,7 +66,7 @@ Commit 规范见 [`00_Roadmap/git_workflow.md`](00_Roadmap/git_workflow.md)。
 <!-- 随进度更新 -->
 - 开始日期：2026-05-27
 - 目标完成：2026-08-27（3 个月）
-- Commits：4
-- Daily Logs：2（Day1: 2026-05-27 / Day2: 2026-05-28）
-- 当前进度：Day 3 / W1 — PoC #1 编码中
-- 使用记录：2 / 5
+- Commits：6+
+- Daily Logs：3（Day1: 2026-05-27 / Day2: 2026-05-28 / Day3: 2026-06-01）
+- 当前进度：W1 Day 4 -- Step 2 启动：db-engine
+- 使用记录：4 / 5

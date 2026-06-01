@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://db-demo-studio.dev/schemas/demo-package.json",
+  "title": "DemoPackage",
+  "description": "DB Demo Studio 演示包单一真相源 — AI 生成、人工校验、双端交付",
+  "type": "object",
+  "required": ["id", "title", "steps", "metadata", "playback"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "全局唯一 ID，格式：dp_<timestamp>",
+      "pattern": "^dp_[a-z0-9]+$",
+      "example": "dp_20260601_join"
+    },
+    "title": {
+      "type": "object",
+      "description": "中英文标题",
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": { "type": "string", "description": "中文标题", "example": "JOIN 查询执行过程" },
+        "en": { "type": "string", "description": "英文标题", "example": "JOIN Query Execution Process" }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "description": "演示步骤数组，按 order 升序排列",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/DemoStep" }
+    },
+    "workflowTrace": {
+      "type": "object",
+      "description": "AI 生成追溯信息（手动 JSON 阶段可空，AI 生成时必须）",
+      "properties": {
+        "workflowId":   { "type": "string", "description": "执行工作流 ID" },
+        "workflowType": { "type": "string", "enum": ["sql-execution", "concept-progression"] },
+        "aiSessionId":  { "type": "string", "description": "AI 会话 ID" },
+        "grounding": {
+          "type": "object",
+          "description": "EXPLAIN 快照引用",
+          "properties": {
+            "mysql":    { "type": "string", "description": "MySQL EXPLAIN 快照 ID" },
+            "postgres": { "type": "string", "description": "PostgreSQL EXPLAIN 快照 ID" }
+          }
+        }
+      }
+    },
+    "engineCompare": {
+      "type": "object",
+      "description": "MySQL vs PostgreSQL 执行计划对照",
+      "properties": {
+        "mysql":    { "$ref": "#/definitions/ExplainSnapshot" },
+        "postgres": { "$ref": "#/definitions/ExplainSnapshot" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "版本与来源元信息",
+      "required": ["teacherVersion"],
+      "properties": {
+        "aiDraftVersion": { "type": "string", "description": "AI 草稿版本号，如 'ai-v3'" },
+        "teacherVersion": { "type": "integer", "minimum": 1, "description": "教师手动编辑版本" },
+        "lastAiAction":   { "type": "string", "enum": ["full-generate", "regenerate-step", "teacher-edit"], "description": "最后一次 AI 操作类型" }
+      }
+    },
+    "playback": {
+      "type": "object",
+      "description": "播放器配置",
+      "required": ["defaultStepDurationMs"],
+      "properties": {
+        "defaultStepDurationMs": { "type": "integer", "minimum": 1000, "default": 5000, "description": "默认每步停留毫秒数" },
+        "subtitles": {
+          "type": "object",
+          "description": "字幕轨道",
+          "properties": {
+            "zh": { "type": "string", "description": "中文字幕文件路径 / 内联 SRT" },
+            "en": { "type": "string", "description": "英文字幕文件路径 / 内联 SRT" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DemoStep": {
+      "type": "object",
+      "description": "单个演示步骤",
+      "required": ["id", "order", "workflowPhase", "narration"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "步骤唯一 ID，格式：step_<序号>",
+          "pattern": "^step_[0-9]+$",
+          "example": "step_1"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "步骤序号，从 1 开始连续递增"
+        },
+        "workflowPhase": {
+          "type": "string",
+          "description": "执行工作流阶段",
+          "enum": ["lex", "parse", "optimize", "plan", "execute", "result", "concept", "transform", "compare", "summary"],
+          "example": "plan"
+        },
+        "narration": {
+          "type": "object",
+          "description": "讲解词（AI 或教师撰写）",
+          "required": ["zh"],
+          "properties": {
+            "zh": { "type": "string", "description": "中文讲解词" },
+            "en": { "type": "string", "description": "英文讲解词" },
+            "source": { "type": "string", "enum": ["ai", "teacher"], "description": "讲解词来源" }
+          }
+        },
+        "visuals": {
+          "type": "object",
+          "description": "动画脚本 / 可视化描述（PoC 阶段可省略）",
+          "properties": {
+            "type": { "type": "string", "description": "可视化类型，如 'highlight-sql', 'plan-tree', 'table-result'" },
+            "highlightRange": {
+              "type": "array",
+              "items": { "type": "integer" },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "高亮 SQL 中的字符范围 [start, end]"
+            }
+          }
+        },
+        "groundingRef": {
+          "type": "string",
+          "description": "指向 EXPLAIN 节点或课纲锚点的引用 ID。SQL 类 plan/execute 步必须有 groundingRef",
+          "example": "mysql_explain.node_001"
+        },
+        "timing": {
+          "type": "object",
+          "description": "步骤时间覆盖",
+          "properties": {
+            "durationMs": { "type": "integer", "description": "覆盖全局 playback.defaultStepDurationMs" }
+          }
+        }
+      }
+    },
+    "ExplainSnapshot": {
+      "type": "object",
+      "description": "EXPLAIN 执行计划快照",
+      "properties": {
+        "query": { "type": "string", "description": "原始 SQL" },
+        "plan":  { "type": "object", "description": "EXPLAIN JSON 输出" },
+        "error": { "type": "string", "description": "若 EXPLAIN 失败，记录错误信息" }
+      }
+    }
+  }
+}

@@ -65,7 +65,7 @@
 - 2026-05-27：Kit 侧车 — ai_commit_review 需求澄清 → `logs/2026-05-27_ai_commit_review_requirements.md`
 - 2026-05-27：Kit 侧车 — Code Review → `logs/review_20260601_012246.md`
 - 2026-06-01：DB Demo Studio — 架构文档 diff 审查 → `02_DB_Demo_Studio/logs/review_20260601_144800.md`
-
+- 2026-06-01：DB Demo Studio — PoC #1 schema/样例 审查 → `02_DB_Demo_Studio/logs/2026-06-01_poc1_demo_schema.md`（含 Code Review 节）
 ---
 
 ## 场景 4：Debug

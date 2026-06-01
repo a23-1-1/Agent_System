@@ -58,6 +58,7 @@
 | 日期 | 任务 | 效果 | 改进 |
 |---|---|---|---|
 | 2026-06-01 | 审查 `02_DB_Demo_Studio/` Day 2 架构文档变更 | 有效。发现 DeepSeek-only 约束与 `architecture.md` 多 Provider 描述冲突，以及 `ai-workflow.md` 的双引擎 EXPLAIN 规则过松 | 下次输入不要只粘路径，要先提供 `git diff -- <path>`；报告保存为 `logs/review_*.md` |
+| 2026-06-01 | 审查 `packages/demo-schema/` schema/样例/校验 | 有效。发现 groundingRef 条件校验缺失、optimize phase 跳过 | 对纯文件（非 git diff）的审查，直接附件路径也有效 |
 
 ---
 

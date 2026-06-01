@@ -1,0 +1,130 @@
+{
+  "$schema": "../schema.json",
+  "id": "dp_20260601_join",
+  "title": {
+    "zh": "INNER JOIN 查询执行过程",
+    "en": "INNER JOIN Query Execution Process"
+  },
+  "steps": [
+    {
+      "id": "step_1",
+      "order": 1,
+      "workflowPhase": "lex",
+      "narration": {
+        "zh": "数据库首先对 SQL 语句进行词法分析（Lexical Analysis）。它将 SQL 文本拆分成一个个 Token——关键字 SELECT、表名 students、JOIN 关键字、courses 等。这一步检查每个单词是否合法，比如表名 students 是否存在。",
+        "en": "The database first performs lexical analysis on the SQL statement. It breaks the SQL text into individual tokens — keywords like SELECT, table names like students, JOIN keyword, courses, etc. This step checks whether each word is valid.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "highlight-sql",
+        "highlightRange": [0, 10]
+      },
+      "groundingRef": null
+    },
+    {
+      "id": "step_2",
+      "order": 2,
+      "workflowPhase": "parse",
+      "narration": {
+        "zh": "词法分析通过后，进入语法分析（Parsing）。数据库根据 SQL 语法规则生成一棵语法树（AST）。例如，它识别出这是一个 SELECT 查询，FROM 子句包含一个 JOIN 操作，ON 条件是 students.id = courses.student_id。如果 SQL 语法有误，这一步就会失败。",
+        "en": "After lexical analysis, the database enters parsing. It generates an Abstract Syntax Tree (AST) based on SQL grammar rules. For example, it recognizes this as a SELECT query with a JOIN in the FROM clause, and the ON condition is students.id = courses.student_id.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "highlight-sql",
+        "highlightRange": [11, 65]
+      },
+      "groundingRef": null
+    },
+    {
+      "id": "step_3",
+      "order": 3,
+      "workflowPhase": "optimize",
+      "narration": {
+        "zh": "语法分析后，优化器开始工作（Query Optimization）。MySQL 优化器会分析多种 JOIN 执行策略：Nested Loop Join、Hash Join、Index Join 等，基于表统计信息（行数、索引选择性）估算每种策略的成本，选择成本最低的方案。对于这个小数据集，优化器选择了 Index Join —— 因为 students 表有主键索引，courses 表有 student_id 外键索引。",
+        "en": "After parsing, the optimizer begins query optimization. MySQL's optimizer analyzes multiple JOIN strategies: Nested Loop Join, Hash Join, Index Join, etc. It estimates the cost of each strategy based on table statistics (row count, index selectivity) and selects the cheapest plan. For this small dataset, the optimizer chose Index Join.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "highlight-sql",
+        "highlightRange": [0, 100]
+      },
+      "groundingRef": null
+    },
+    {
+      "id": "step_4",
+      "order": 4,
+      "workflowPhase": "plan",
+      "narration": {
+        "zh": "优化器确定执行计划后，通过 MySQL 的 EXPLAIN 可以看到具体细节：数据库选择了「Index Join」方式——先扫描 students 表（索引），再对每行去 courses 表查找匹配记录。这条计划的预估行数是 5 行，成本（cost）为 1.75。",
+        "en": "After the optimizer decides on a plan, MySQL's EXPLAIN reveals the details: the database chose an 'Index Join' strategy — first scanning the students table index, then looking up matching rows in courses for each row. Estimated rows: 5, cost: 1.75.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "plan-tree"
+      },
+      "groundingRef": "mysql_explain.node_001"
+    },
+    {
+      "id": "step_5",
+      "order": 5,
+      "workflowPhase": "execute",
+      "narration": {
+        "zh": "数据库按照执行计划逐步执行。先访问 students 表的主键索引，读取所有行（共 3 行）。对于每一行，通过索引查找 courses 表中 student_id 匹配的记录。这个过程中，数据库会涉及缓冲池（Buffer Pool）的读操作、索引树的遍历比较等底层操作。",
+        "en": "The database executes step by step according to the plan. It first accesses the primary key index of the students table, reading all 3 rows. For each row, it looks up matching records in the courses table's index by student_id. This involves buffer pool reads and index tree traversal.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "table-result"
+      },
+      "groundingRef": "mysql_explain.node_001"
+    },
+    {
+      "id": "step_6",
+      "order": 6,
+      "workflowPhase": "result",
+      "narration": {
+        "zh": "执行完成，数据库返回最终结果集。INNER JOIN 只返回两表匹配的行——这里只有 2 行数据（student_1 选了 course_A 和 course_B）。如果某学生在 courses 表中没有选课记录，就不会出现在结果中。在 MySQL 的 Join Buffer 中，这一过程还涉及了 Join Buffer 的使用和内存管理。",
+        "en": "Execution complete. The database returns the final result set. INNER JOIN only returns matched rows — here, 2 rows (student_1 enrolled in course_A and course_B). If a student has no course records, they won't appear in the result. This process also involves Join Buffer usage and memory management.",
+        "source": "ai"
+      },
+      "visuals": {
+        "type": "table-result"
+      },
+      "groundingRef": null
+    }
+  ],
+  "workflowTrace": {
+    "workflowId": "manual-demo",
+    "workflowType": "sql-execution",
+    "aiSessionId": "manual",
+    "grounding": {
+      "mysql":    null,
+      "postgres": null
+    }
+  },
+  "engineCompare": {
+    "mysql": {
+      "query": "SELECT s.name, c.course_name FROM students s INNER JOIN courses c ON s.id = c.student_id",
+      "plan": null,
+      "error": null
+    },
+    "postgres": {
+      "query": "SELECT s.name, c.course_name FROM students s INNER JOIN courses c ON s.id = c.student_id",
+      "plan": null,
+      "error": null
+    }
+  },
+  "metadata": {
+    "aiDraftVersion": null,
+    "teacherVersion": 1,
+    "lastAiAction": "teacher-edit"
+  },
+  "playback": {
+    "defaultStepDurationMs": 5000,
+    "subtitles": {
+      "zh": null,
+      "en": null
+    }
+  }
+}

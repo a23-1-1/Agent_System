@@ -1,0 +1,9 @@
+services:
+  ai-commit-review:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      # Mount Agent_System repo root so git diff and .git work
+      - ..:/workspace
+    working_dir: /workspace/01_AI_Dev_Workflow_Kit

@@ -1,7 +1,8 @@
 # 我的 AI 辅助开发工作流
 
-> 版本：v0.1（2026-05-27）  
-> 原则：AI 是协作者，不是替代者。每个环节都有人工校验点。
+> 版本：v0.2（2026-05-27）  
+> 原则：AI 是协作者，不是替代者。每个环节都有人工校验点。  
+> API：仅 DeepSeek → 见 `00_Roadmap/learning_constraints.md`
 
 ---
 
@@ -46,8 +47,10 @@ flowchart LR
 # 1. 基于 issue 生成计划
 # 使用 prompts/requirements.md
 
-# 2. 开发完成后，AI 审查 diff
-git diff --staged | python scripts/ai_commit_review.py
+# 2. 开发完成后，AI 审查 diff（DeepSeek）
+cd 01_AI_Dev_Workflow_Kit
+cp .env.example .env   # 本地填入 DEEPSEEK_API_KEY，不进 git
+python scripts/ai_commit_review.py --unstaged
 
 # 3. 测试失败时，粘贴错误给 AI
 # 使用 prompts/debug.md
@@ -80,11 +83,12 @@ git diff --staged | python scripts/ai_commit_review.py
 
 ---
 
-## 当前版本限制（v0.1）
+## 当前版本状态（v0.2）
 
-- Prompt 模板尚未全部完成
-- `ai_commit_review.py` 尚未接入 LLM
-- 真实使用记录：0 条（目标 >= 5）
+- [x] `ai_commit_review.py` 已接入 DeepSeek API
+- [x] Docker 运行支持
+- [ ] Prompt 模板全部完成实战验证
+- 真实使用记录：**1 / 5**（目标 >= 5）
 
 ---
 

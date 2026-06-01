@@ -16,11 +16,11 @@
 ## 2. 核心功能
 
 - [x] 项目骨架与 README
-- [ ] 5 个 Prompt 模板（requirements / architecture / code_review / debug / refactor）
-- [ ] AI 开发工作流文档
-- [ ] 5 个 AI 编程场景分析
-- [ ] `ai_commit_review.py` — 读取 git diff 生成审查报告
-- [ ] 至少 5 条真实使用记录
+- [x] 5 个 Prompt 模板骨架（requirements / architecture / code_review / debug / refactor）
+- [ ] AI 开发工作流文档定稿
+- [x] 5 个 AI 编程场景分析（Day 1 已填个人案例）
+- [x] `ai_commit_review.py` — DeepSeek Code Review 已跑通
+- [ ] 至少 5 条真实使用记录（当前 1/5）
 
 ---
 
@@ -39,12 +39,48 @@
 
 ## 4. 快速开始
 
+### 本地运行
+
 ```bash
-# 使用 git diff 审查（需配置 LLM API）
+cd 01_AI_Dev_Workflow_Kit
+cp .env.example .env   # 填入 DEEPSEEK_API_KEY
+pip install -r requirements.txt
+
+# 审查 staged changes
 python scripts/ai_commit_review.py
 
-# 或手动使用 prompts/ 下的模板
-# 复制模板内容到 Cursor / Claude，填入具体上下文
+# 审查 unstaged / 指定 commit
+python scripts/ai_commit_review.py --unstaged
+python scripts/ai_commit_review.py --commit HEAD~1
+```
+
+### Docker 运行（无需本地 pip）
+
+在 `01_AI_Dev_Workflow_Kit/` 目录下：
+
+```bash
+cp .env.example .env   # 填入 DEEPSEEK_API_KEY
+
+# 构建镜像
+docker compose build
+
+# 审查 staged changes（默认）
+docker compose run --rm ai-commit-review
+
+# 传递 CLI 参数
+docker compose run --rm ai-commit-review --unstaged
+docker compose run --rm ai-commit-review --commit HEAD~1
+docker compose run --rm ai-commit-review --output logs/my_review.md
+```
+
+容器会将上级目录 `Agent_System/` 挂载到 `/workspace`，脚本在此目录执行 `git diff`；报告写入 `logs/`（宿主机同步可见）。
+
+**Windows 注意**：在 PowerShell 中于 `01_AI_Dev_Workflow_Kit` 运行上述命令即可；需已安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 并启用 WSL2 后端。若 `.env` 缺失，`docker compose` 会报错，请先复制 `.env.example`。
+
+### 手动使用 Prompt 模板
+
+```bash
+# 复制 prompts/ 下的模板到 Cursor / Claude，填入具体上下文
 ```
 
 ---
@@ -79,11 +115,18 @@ python scripts/ai_commit_review.py
 
 ## 8. 已知问题
 
-- `ai_commit_review.py` 尚未实现 LLM 调用（Week 1 Day 5 任务）
+- diff 超过 8000 字符会截断，审查范围可能不完整
+- scenarios.md 格式待 Day 2 统一整理
 
 ---
 
-## 9. 后续计划
+## 9. API 策略
+
+本仓库 LLM 调用统一使用 **DeepSeek API**。配置见 `.env.example` 与 `00_Roadmap/learning_constraints.md`。
+
+---
+
+## 10. 后续计划
 
 - Week 2：完成编码闭环实战
 - Week 3：Debug 与 Refactor 模板实战
@@ -93,4 +136,4 @@ python scripts/ai_commit_review.py
 
 ## 10. 学习记录
 
-- 2026-05-27：项目启动，创建骨架
+- 2026-05-27：项目启动；ai_commit_review 接入 DeepSeek；第 1 条使用记录

@@ -43,7 +43,8 @@ MCP 是 Anthropic 提出的开放协议，让 AI 应用（Client）以标准化�
 
 ## 我自己的理解
 
-<!-- 学习过程中持续更新 -->
+MCP 像 USB 接口：Agent 不用为每个工具单独写对接代码，按 MCP 协议连上就能用。
+Phase 3 会自己做 MCP Server；Day 1 先理解它和 Tool Calling 的关系即可。
 
 ## 参考资料
 

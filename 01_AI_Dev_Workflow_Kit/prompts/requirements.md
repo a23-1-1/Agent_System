@@ -14,10 +14,10 @@
 ## 原始需求
 
 {{粘贴 issue / 口头描述 / 聊天记录}}
+ 给 ai_commit_review.py 接入 deepseek API，读取 git diff 生成 Code Review 报告
 
 ## 现有上下文（可选）
 
-{{相关代码文件路径、现有架构说明、约束条件}}
 
 ## 请输出
 

@@ -1,12 +1,13 @@
 # Project Matrix
 
 > 最后更新：2026-05-27  
+> API 策略：仅 DeepSeek → [`learning_constraints.md`](learning_constraints.md)
 > 时间线：**3 个月**（2026-05-27 → 2026-08-27）  
 > 详细计划：[`3month_plan.md`](3month_plan.md)
 
 | 项目 | Phase | 状态 | 当前任务 | 下一个里程碑 | 产出物 |
 |---|---|---|---|---|---|
-| AI Dev Workflow Kit | Phase 1 | Building | 搭建目录 + 写 workflow | 完成 5 个 prompt 模板 | README + 模板 |
+| AI Dev Workflow Kit | Phase 1 | Building | DeepSeek Code Review 已跑通 | 5 条使用记录 + workflow v1 | README + 模板 + 脚本 |
 | Paper RAG Assistant | Phase 2 | Not Started | — | PDF 解析模块 | Demo |
 | Personal MCP Server | Phase 3 | Not Started | — | 实现第一个 tool | MCP Server |
 | Mini Agent Framework | Phase 4 | Not Started | — | Agent Loop | 框架代码 |

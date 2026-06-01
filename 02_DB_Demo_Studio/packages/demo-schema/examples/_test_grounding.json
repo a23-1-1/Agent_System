@@ -1,1 +1,0 @@
-{"id":"test","title":{"zh":"测试","en":"Test"},"steps":[{"id":"step_1","order":1,"workflowPhase":"lex","narration":{"zh":"a"}},{"id":"step_2","order":2,"workflowPhase":"plan","narration":{"zh":"a"}}],"metadata":{"teacherVersion":1},"playback":{"defaultStepDurationMs":5000},"workflowTrace":{"workflowType":"sql-execution"}}

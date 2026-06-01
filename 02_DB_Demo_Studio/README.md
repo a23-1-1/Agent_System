@@ -1,22 +1,30 @@
-# DB Demo Studio — 数据库课程演示生产工具
+# DB Demo Studio — AI 原生数据库演示平台
 
-> **完整学习项目**：从需求澄清 → 架构设计 → PoC → 分阶段实现，面向大学数据库课教师的可视化演示生产工具。
+> **完整学习项目**：需求澄清 → **AI 优先架构** → PoC → 分阶段实现。  
+> 核心：**AI 交互式生成演示** + **执行演示工作流** → 同源导出交互网页与双语 MP4。
 
 | 字段 | 值 |
 |---|---|
 | **项目代号** | `db_demo_video` / DB Demo Studio |
-| **状态** | Phase 0 — 文档与架构已就绪，待 PoC |
+| **状态** | Phase 0 — AI 架构 v2 就绪，待 PoC |
 | **代码根目录** | 本目录 `02_DB_Demo_Studio/` |
 
 ---
 
 ## 项目目标
 
-为大学数据库课程教师提供**全课纲内容生产 + 三场景教学**工具：从课本知识点与 SQL 示例出发，经 **LLM 自动生成分步讲解与可视化初稿**，教师精修后产出**课堂可交互网页**与**带双语字幕 MP4**；执行语义以 MySQL/PostgreSQL 为参照；支持 LMS 嵌入与学生课后自学。
+为大学数据库课教师提供 **AI 对话式演示生产工具**：用自然语言描述知识点或粘贴 SQL，**AI Agent** 结合 MySQL/PostgreSQL **EXPLAIN 真值**与课纲上下文，**流式生成**分步执行演示；教师可对话修改任一步；定稿后**同源发布**交互网页与带双语字幕 MP4。
+
+### 两大核心能力
+
+| 能力 | 说明 |
+|---|---|
+| **AI 交互式生成** | AI Studio 对话界面 — 流式预览、单步重写、Slash 快捷指令 |
+| **执行演示工作流** | SQL/概念 → 标准阶段 DAG（解析→计划→执行→结果）— EXPLAIN grounding，防幻觉 |
 
 **双交付物（同源）：** 交互网页 + MP4（含字幕，至少中英双语）
 
-**三场景：** 教师备课 · 课堂现场分步演示 · 学生课后只读自学
+**三场景：** 教师备课（AI Studio）· 课堂分步演示（Execution Player）· 学生课后自学
 
 ---
 
@@ -24,10 +32,10 @@
 
 | 文档 | 路径 | 说明 |
 |---|---|---|
-| **需求澄清** | [`00_Notes/requirements/db_demo_video_requirements.md`](../00_Notes/requirements/db_demo_video_requirements.md) | Q1–Q10 已确认；功能清单与验收标准 |
-| **架构设计（canonical）** | [`docs/architecture.md`](./docs/architecture.md) | 方案 A/B 对比、模块划分、接口、分阶段实施 |
-| **课纲—模板映射** | [`docs/curriculum-mapping.md`](./docs/curriculum-mapping.md) | 8 大类课纲节点与 Phase 1/2 实现顺序 |
-| **架构文档跳转** | [`00_Notes/requirements/db_demo_video_architecture.md`](../00_Notes/requirements/db_demo_video_architecture.md) | 指向本目录 canonical 架构 |
+| **需求澄清** | [`00_Notes/requirements/db_demo_video_requirements.md`](../00_Notes/requirements/db_demo_video_requirements.md) | Q1–Q10；含 AI 交互与执行工作流功能 |
+| **架构设计 v2（AI 优先）** | [`docs/architecture.md`](./docs/architecture.md) | Agent + 执行工作流 + 方案 A/B |
+| **AI 工作流详设** | [`docs/ai-workflow.md`](./docs/ai-workflow.md) | AI Studio、Agent、Tools、SSE 协议 |
+| **课纲—模板映射** | [`docs/curriculum-mapping.md`](./docs/curriculum-mapping.md) | 8 大类与 workflowType 映射 |
 
 ---
 
@@ -46,20 +54,36 @@
 ```
 02_DB_Demo_Studio/
 ├── apps/
-│   ├── web/          # React：备课 / 课堂 / 学生三模式
-│   ├── api/          # Fastify：CRUD、生成编排、导出、LMS
-│   └── renderer/     # Remotion：MP4 + 字幕导出
+│   ├── web/
+│   │   └── src/features/
+│   │       ├── ai-studio/          ★ AI 对话式生成
+│   │       ├── execution-player/   ★ 分步执行演示
+│   │       └── step-editor/
+│   ├── api/                        AI SSE + workflow routes
+│   └── renderer/
 ├── packages/
-│   ├── demo-schema/  # 演示包 JSON Schema（单一真相源）
-│   ├── viz-primitives/
-│   ├── db-engine/
+│   ├── ai-orchestrator/            ★ Agent 编排
+│   ├── ai-tools/                   ★ LLM 工具（EXPLAIN 等）
+│   ├── execution-workflow/         ★ 执行演示工作流引擎
 │   ├── llm-pipeline/
+│   ├── prompt-registry/
+│   ├── demo-schema/
 │   └── ...
-├── infra/            # docker-compose、部署清单
-└── docs/             # 架构与课纲映射（当前已有）
+├── infra/
+└── docs/
 ```
 
 当前 Phase 0 仅包含 `docs/` 与占位目录；PoC 通过后初始化 monorepo 工具链（pnpm + Turborepo）。
+
+### W1 学习 PoC（本周验收，先于下方 8–10 周纵向切片）
+
+| PoC | 交付 | 验收 |
+|---|---|---|
+| **#1** | 手写 `DemoPackage` JSON + 最小 Execution Player | 浏览器 ←/→/空格 控制 ≥3 步 |
+| **#2** | `explain_mysql` + `explain_postgres` → 工作流 IR | ≥3 步且含 `groundingRef` |
+| **#3** | 最小 AI Studio SSE | 单轮对话生成一步讲解词 |
+
+> 下方 Gantt 为 **Phase 1 产品化纵向切片（约 8–10 周）**，与 W1 日计划并行但不等同。
 
 ---
 
@@ -67,32 +91,29 @@
 
 ```mermaid
 gantt
-    title Phase 1 纵向切片（约 8–10 周）
+    title Phase 1 — AI 纵向切片
     dateFormat YYYY-MM-DD
     section 内核
-    DemoPackage Schema + Player     :a1, 2026-06-02, 7d
-    MySQL EXPLAIN 沙箱              :a2, after a1, 7d
-    section 流水线
-    LLM 讲解生成（60s SLA）         :b1, after a2, 7d
-    教师编辑闭环                    :b2, after b1, 7d
+    DemoPackage + Execution Player   :a1, 2026-06-02, 7d
+    execution-workflow + db-engine     :a2, after a1, 7d
+    section AI
+    ai-tools + ai-orchestrator         :b1, after a2, 10d
+    AI Studio SSE 对话生成             :b2, after b1, 7d
+    单步 regenerate-step               :b3, after b2, 5d
     section 交付
-    Remotion MP4 + 字幕             :c1, after b2, 14d
-    非 SQL 模板 ×3                  :c2, after b1, 14d
-    section 集成
-    LMS 试嵌入（Moodle 或超星）     :d1, after c1, 7d
-    教师端到端试用                  :d2, after d1, 7d
+    Remotion MP4 + 字幕                :c1, after b3, 14d
+    LMS + 教师试用                     :d1, after c1, 14d
 ```
 
 ### Phase 1 交付清单
 
-- [ ] **DemoPackage** 单一数据模型驱动网页 Player 与 MP4 导出
-- [ ] LLM 讲解词 + 教师逐步编辑（文案与动画）
-- [ ] SQL 模板 ≥5 类；非 SQL 模板 ≥3 类（ER、范式、事务示意）
-- [ ] MySQL EXPLAIN 完整；PostgreSQL 至少部分对照
-- [ ] 交互网页 + 带中英字幕 MP4（同源步骤一致）
-- [ ] 备课 + 课堂 + 学生只读链接
-- [ ] 1 种 LMS 试嵌入；API 用量可观测与失败降级
-- [ ] 1 名真实教师 10 分钟端到端验收
+- [ ] **Execution Workflow** — SQL 分步 DAG + EXPLAIN grounding
+- [ ] **AI Studio** — 对话流式生成演示初稿（≤60s）
+- [ ] **单步 AI 重写** — regenerate-step，不整包重来
+- [ ] **DemoPackage** 驱动 Player 与 MP4（步骤一致）
+- [ ] LLM 讲解 + 教师编辑；MySQL EXPLAIN；PG 部分对照
+- [ ] 非 SQL 工作流 ×3（ER、范式、事务）
+- [ ] 交互网页 + 中英字幕 MP4；LMS 试嵌入
 
 ### Phase 2 方向（概要）
 
@@ -102,9 +123,10 @@ gantt
 
 ## 快速开始（PoC 阶段）
 
-1. 阅读 [需求文档](../00_Notes/requirements/db_demo_video_requirements.md) 与 [架构设计](./docs/architecture.md)
-2. 按架构文档 **PoC 顺序 #1**：手写 DemoPackage JSON → 网页 Player 逐步播放
-3. 记录 PoC 日志于 `02_DB_Demo_Studio/logs/`（待创建）或 `00_Learning_Logs/`
+1. 阅读 [需求](../00_Notes/requirements/db_demo_video_requirements.md)、[架构 v2](./docs/architecture.md)、[AI 工作流](./docs/ai-workflow.md)
+2. PoC **#1**：手写带 `workflowPhase` 的 DemoPackage → Execution Player 分步播放
+3. PoC **#2**：`explain_mysql` 工具 → 工作流 IR → 至少 3 步 grounding
+4. PoC **#3**：最小 AI Studio — 单轮对话 SSE 生成一步讲解词
 
 ---
 
@@ -113,3 +135,4 @@ gantt
 | 日期 | 变更 |
 |---|---|
 | 2026-06-01 | 初始化学习项目目录、架构 canonical、课纲映射初稿 |
+| 2026-06-01 | **v2 AI 优先**：architecture 重构、新增 ai-workflow.md |

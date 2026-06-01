@@ -57,8 +57,12 @@
 
 | 日期 | 任务 | 效果 | 改进 |
 |---|---|---|---|
-| | | | |
+| 2026-06-01 | 审查 `02_DB_Demo_Studio/` Day 2 架构文档变更 | 有效。发现 DeepSeek-only 约束与 `architecture.md` 多 Provider 描述冲突，以及 `ai-workflow.md` 的双引擎 EXPLAIN 规则过松 | 下次输入不要只粘路径，要先提供 `git diff -- <path>`；报告保存为 `logs/review_*.md` |
 
 ---
 
 ## 迭代笔记
+
+- 2026-06-01：Code Review prompt 对文档类变更同样有效，重点不只是代码 bug，还包括约束冲突、验收口径不一致、计划粒度混乱。
+- 对路径级审查，推荐先生成真实 diff：`git diff -- 02_DB_Demo_Studio`，再粘贴到模板中；只写目录路径无法让 AI 看到变更内容。
+- 文档审查也要按 P0-P3 输出，P1 可用于标记“会导致后续实现跑偏”的架构/约束问题。

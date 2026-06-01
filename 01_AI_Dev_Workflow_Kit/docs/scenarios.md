@@ -36,12 +36,12 @@
 
 **我的 Prompt 模板**：`prompts/architecture.md`
 
-```markdown
-**我的真实案例**：开发智慧课堂助手
-**预期 AI 帮助**：给我设计功能架构
-**人工校验点**：技术选型，功能设计图，系统架构图
+**我的真实案例**：DB Demo Studio 中 `packages/ai-orchestrator/` 的 Agent 编排、多轮对话、工具调度架构设计
+**预期 AI 帮助**：基于现有 `architecture.md`、`ai-workflow.md` 和需求文档，输出模块划分、核心接口、数据流、方案对比与风险
+**人工校验点**：是否符合现有模块边界；是否坚持 DeepSeek-only；是否避免过度设计；是否保留 EXPLAIN / workflow grounding
 
 **使用记录**：
+- 2026-06-01：`packages/ai-orchestrator/` 架构设计 → `02_DB_Demo_Studio/logs/2026-06-01_day2_ai_orchestrator_architecture.md`
 
 ---
 
@@ -64,6 +64,7 @@
 **使用记录**：
 - 2026-05-27：Kit 侧车 — ai_commit_review 需求澄清 → `logs/2026-05-27_ai_commit_review_requirements.md`
 - 2026-05-27：Kit 侧车 — Code Review → `logs/review_20260601_012246.md`
+- 2026-06-01：DB Demo Studio — 架构文档 diff 审查 → `02_DB_Demo_Studio/logs/review_20260601_144800.md`
 
 ---
 

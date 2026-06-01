@@ -56,8 +56,12 @@
 
 | 日期 | 任务 | 效果 | 改进 |
 |---|---|---|---|
-| | | | |
+| 2026-06-01 | DB Demo Studio：`packages/ai-orchestrator/` 架构设计 | 有效。把总架构里的 Agent 编排模块细化为 `orchestrator / session-store / agent-runner / tool-router / policies / stream-events`，明确了 SSE 事件、工具调用、单步重写和 grounding 守卫 | 下次填 prompt 时要明确「只设计某个模块」，避免重复输出整个系统架构；输出文件命名带 Day + 日期 |
 
 ---
 
 ## 迭代笔记
+
+- 2026-06-01：本模板适合做“模块级架构细化”，但输入上下文必须控制范围。例如今天聚焦 `packages/ai-orchestrator/`，而不是重新设计整个 DB Demo Studio。
+- 模板中建议新增一项「目标粒度」：系统级 / 模块级 / 接口级 / PoC 级。这样能减少 AI 过度设计。
+- 对 Agent 类模块，必须额外要求输出：会话状态、工具路由、SSE 事件、超时/防循环、grounding 校验。

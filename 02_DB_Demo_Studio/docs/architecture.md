@@ -1,370 +1,463 @@
-# DB Demo Studio — 架构设计
+# DB Demo Studio — 架构设计（AI 优先）
 
 | 字段 | 值 |
 |---|---|
 | **日期** | 2026-06-01 |
+| **版本** | v2 — AI 交互生成 + 执行演示工作流 |
 | **状态** | 架构定稿，待 PoC 验证 |
 | **项目代号** | db_demo_video |
 | **需求来源** | [`00_Notes/requirements/db_demo_video_requirements.md`](../../00_Notes/requirements/db_demo_video_requirements.md) |
+| **AI 工作流详设** | [`ai-workflow.md`](./ai-workflow.md) |
 | **代码根目录** | `02_DB_Demo_Studio/` |
+
+---
+
+## 产品定位（AI 优先）
+
+**DB Demo Studio 是一个 AI 原生的数据库教学演示平台**——教师用自然语言与 AI 对话，交互式生成「分步执行演示 + 讲解词 + 动画脚本」，经人机协作定稿后，**同源导出**交互网页与带双语字幕 MP4。
+
+| 传统工具 | 本产品（AI 优先） |
+|---|---|
+| 手工做 PPT / 录屏 | **对话式生成**演示初稿，流式可见 |
+| 静态视频 | **可交互分步执行** + AI 可随时「重讲这一步」 |
+| 模板填空 | **AI Agent + 工具调用**（EXPLAIN、课纲 RAG、SQL 分析） grounding |
+| 一次性生成 | **迭代工作流**：生成 → 预览 → 修改 → 再生成单步 |
+
+**两大 AI 核心能力：**
+
+1. **AI 交互式生成演示** — 教师与 AI Copilot 对话，实时产出/修改 DemoPackage
+2. **AI 驱动的执行演示工作流** — SQL/概念 → 分步执行逻辑 → 可视化 + 讲解，全程可追踪
 
 ---
 
 ## 需求摘要
 
-为大学数据库课程教师提供**全课纲可视化演示生产工具**：从课本知识点与 SQL 示例出发，经 **LLM 自动生成分步讲解与动画初稿**，教师精修每步文案与动画后，**同源发布**课堂可交互网页与**带中英双语字幕的 MP4**；SQL 执行语义对齐 **MySQL + PostgreSQL**；支持 **教师备课、课堂分步演示、学生课后自学** 三场景及 **Moodle / 超星 LMS 嵌入**。
+为大学数据库课教师提供 **AI 交互式演示生产 + 执行过程可视化** 工具：自然语言描述课本知识点或粘贴 SQL，AI 结合 **MySQL/PostgreSQL EXPLAIN 真值** 与课纲上下文，**流式生成**分步演示初稿；教师可在对话中或编辑器里精修任一步；定稿后发布交互网页并导出带中英字幕 MP4；支持备课、课堂、自学三场景及 LMS 嵌入。
 
-**已确认决策（Q1–Q10）：** 双交付物 · 自动生成+教师可编辑 · LLM 讲解词 · 双引擎 · 全课纲 · 三场景 · 预算充足/付费 API · LMS · 真实教学产品 · 字幕双语。
+**已确认决策（Q1–Q10）：** 双交付 · AI 生成+教师可编辑 · LLM 讲解 · 双引擎 · 全课纲 · 三场景 · 付费 API · LMS · 真实教学产品 · 字幕双语。
 
 ---
 
 ## 现有系统上下文
 
-- **技术栈：** TypeScript monorepo（pnpm + Turborepo）— React 18 + Vite 前端；Node.js + Fastify 后端；BullMQ + Redis 任务队列；PostgreSQL 16 业务库；MinIO/S3 对象存储；Remotion + ffmpeg 视频导出；LLM/TTS 付费 API；Docker 沙箱 MySQL 8 + PostgreSQL 16（EXPLAIN）；LTI 1.3（Moodle）+ iframe 深链接（超星）
+- **技术栈：**
+  - **AI 层：** **DeepSeek API**（OpenAI-compatible SDK；本仓库统一 Provider，见 [`learning_constraints.md`](../../00_Roadmap/learning_constraints.md)）+ **Agent 编排**（Tool Calling）+ **SSE 流式输出** + Prompt Registry
+  - **执行 grounding：** Docker 沙箱 MySQL 8 + PostgreSQL 16（`EXPLAIN`）+ `node-sql-parser`
+  - **应用层：** TypeScript monorepo — React 18 + Vite（**AI Studio** 对话 UI）；Fastify API；BullMQ + Redis
+  - **渲染层：** Remotion + ffmpeg（MP4 + 字幕）；`viz-primitives` 与 Player 共用
+  - **数据层：** PostgreSQL 16 + MinIO/S3 + 向量库（课纲/教材 RAG，Phase 1 可选简化）
 
 - **相关模块：**
-  - `02_DB_Demo_Studio/apps/web` — 备课 / 课堂 / 学生三模式前端
-  - `02_DB_Demo_Studio/apps/api` — REST API、生成编排、导出、LMS、RBAC
-  - `02_DB_Demo_Studio/apps/renderer` — Remotion MP4 + 字幕渲染
-  - `02_DB_Demo_Studio/packages/demo-schema` — 演示包 JSON Schema（单一真相源）
-  - `02_DB_Demo_Studio/packages/viz-primitives` — 共享可视化组件
-  - `02_DB_Demo_Studio/packages/db-engine` — MySQL/PG EXPLAIN 沙箱
-  - `02_DB_Demo_Studio/packages/sql-analyzer` — SQL 解析与步骤拆分
-  - `02_DB_Demo_Studio/packages/llm-pipeline` — LLM 提示词与降级
-  - `02_DB_Demo_Studio/packages/subtitle-kit` — 双语字幕时间轴
-  - `02_DB_Demo_Studio/packages/lms-bridge` — LTI / 超星嵌入
-  - `02_DB_Demo_Studio/packages/curriculum` — 课纲模板注册表
-  - `00_Notes/requirements/db_demo_video_requirements.md` — 需求文档（只读引用）
-  - `01_AI_Dev_Workflow_Kit/` — 工作流经验可复用，**运行时零耦合**
+  - `apps/web/src/features/ai-studio/` — **AI 对话式生成界面**（核心 UX）
+  - `apps/web/src/features/execution-player/` — 分步执行演示播放器
+  - `packages/ai-orchestrator/` — **Agent 编排、多轮对话、工具调度**
+  - `packages/ai-tools/` — LLM 可调工具：EXPLAIN、SQL 分析、课纲检索、步骤校验
+  - `packages/execution-workflow/` — **执行演示工作流引擎**（状态机 + 步骤 DAG）
+  - `packages/llm-pipeline/` — 提示词、结构化输出 Schema、降级策略
+  - `packages/demo-schema/` — DemoPackage 单一真相源
+  - `packages/db-engine/` — MySQL/PG 沙箱
+  - `packages/viz-primitives/` — 可视化组件
+  - `packages/prompt-registry/` — 版本化 Prompt（讲解/分步/动画/双语）
+  - 详见 [`ai-workflow.md`](./ai-workflow.md)
 
 - **约束：**
-  - 生成初稿 ≤ **60s**（含 LLM）；课堂步进切换 < **200ms**
-  - **网页与 MP4 步骤、文案、时长必须一致**（单一 DemoPackage）
-  - MySQL + PostgreSQL 真实 EXPLAIN；差异并排展示；非引擎行为标「教学简化」
-  - 三场景 RBAC：学生只读，教师可编辑
-  - 敏感 SQL 默认不出境；API Key 仅存服务端；付费 API 用量可审计
-  - Phase 1 至少 **1 种 LMS** 试嵌入；字幕级中英双语
-  - **YAGNI：** Phase 1 不做全校 SSO、LMS 成绩簿、内核级 DB 仿真、商业剪辑台
+  - AI 首屏响应（流式第一 token）≤ **3s**；完整初稿 ≤ **60s**
+  - 执行演示每步须可 **grounding** 到 EXPLAIN 或课纲模板（禁止纯幻觉步骤）
+  - 教师可随时 **「只重生成当前步」** 而不整包重来
+  - 网页与 MP4 步骤一致；引擎差异标「教学简化」
+  - LLM 调用可审计；敏感 SQL 默认不出境
+  - **LLM 仅 DeepSeek**；禁止 Phase 1 引入多 Provider 切换
+  - SQL 类演示默认 **双引擎 EXPLAIN**（MySQL + PostgreSQL）；单引擎失败须显式降级标注
 
 ---
 
-## 1. 方案 A（推荐）— TypeScript Monorepo + DemoPackage 单一真相源
+## AI 核心架构总览
+
+```mermaid
+flowchart TB
+    subgraph Teacher["教师 — AI Studio"]
+        Chat["自然语言对话\n「讲 JOIN 执行过程」"]
+        Preview["实时预览\n分步 Player"]
+        Edit["点选步骤\n「这步讲简单点」"]
+    end
+
+    subgraph AI["packages/ai-orchestrator — AI Agent"]
+        Agent["Demo Agent\n(ReAct / Tool Use)"]
+        Mem["会话上下文\n+ DemoPackage 草稿"]
+        Stream["SSE 流式输出"]
+    end
+
+    subgraph Tools["packages/ai-tools — 工具层"]
+        T1["curriculum_search\n课纲 RAG"]
+        T2["sql_analyze\n语法与错误"]
+        T3["explain_mysql / explain_pg\n执行计划真值"]
+        T4["build_execution_steps\n工作流编排"]
+        T5["generate_visual_spec\n动画脚本"]
+        T6["translate_bilingual\n中英讲解"]
+    end
+
+    subgraph Workflow["packages/execution-workflow"]
+        WF["Execution Demo Workflow\n解析→优化→计划→执行→结果"]
+        DAG["步骤 DAG + 状态机"]
+    end
+
+    subgraph Output["交付层"]
+        PKG["DemoPackage\n单一真相源"]
+        Web["交互网页 Player"]
+        MP4["MP4 + 双语字幕"]
+    end
+
+    Chat --> Agent
+    Edit --> Agent
+    Agent --> Mem
+    Agent --> Stream
+    Stream --> Preview
+
+    Agent --> T1 & T2 & T3 & T4 & T5 & T6
+    T3 --> WF
+    T4 --> WF
+    WF --> DAG
+    DAG --> PKG
+
+    Agent --> PKG
+    PKG --> Web & MP4
+```
+
+---
+
+## 执行演示工作流（Execution Demo Workflow）
+
+SQL 类演示的核心不是「一次性生成视频」，而是 **可解释、可逐步推进的执行工作流**：
+
+```mermaid
+stateDiagram-v2
+    [*] --> IntentParse: 教师输入 / AI 理解意图
+    IntentParse --> SqlGrounding: SQL 类演示
+    IntentParse --> ConceptGrounding: ER/范式/事务类
+
+    SqlGrounding --> LexParse: 词法/语法分析
+    LexParse --> Optimize: 查询优化（可选简化）
+    Optimize --> PlanMySQL: EXPLAIN MySQL
+    Optimize --> PlanPG: EXPLAIN PostgreSQL
+    PlanMySQL --> StepAssembly: AI 组装讲解步骤
+    PlanPG --> StepAssembly
+    ConceptGrounding --> StepAssembly
+
+    StepAssembly --> AiNarration: LLM 生成每步讲解词
+    AiNarration --> VisualScript: LLM 生成动画脚本
+    VisualScript --> TeacherReview: 教师预览 / 对话修改
+    TeacherReview --> StepAssembly: 「重生成第 N 步」
+    TeacherReview --> Published: 定稿
+    Published --> [*]
+```
+
+| 工作流阶段 | 执行者 | 输出 | AI 角色 |
+|---|---|---|---|
+| 意图理解 | Agent | `DemoIntent` | 解析教师自然语言 + 课纲节点 |
+| SQL Grounding | `ai-tools` + `db-engine` | `ExplainSnapshot` ×2 | **禁止幻觉**：步骤必须引用 EXPLAIN 节点 |
+| 步骤拆分 | `execution-workflow` | `ExecutionStep[]` | AI 建议顺序；引擎 IR 约束结构 |
+| 讲解生成 | `llm-pipeline` | `narration.zh/en` | 逐步流式生成，可单步重写 |
+| 动画脚本 | `llm-pipeline` | `VisualSpec` | 映射到 `viz-primitives` 类型 |
+| 人机定稿 | `ai-studio` UI | `DemoPackage` vN | 对话式修改或表单编辑 |
+
+---
+
+## 1. 方案 A（推荐）— AI Agent + 执行工作流 + DemoPackage 同源渲染
 
 ### 模块划分
 
 ```text
 02_DB_Demo_Studio/
 ├── apps/
-│   ├── web/                 # React：prep / live / study / editor
-│   ├── api/                 # Fastify：routes + BullMQ workers
-│   └── renderer/            # Remotion compositions + render-cli
+│   ├── web/
+│   │   └── src/features/
+│   │       ├── ai-studio/          ★ AI 对话式生成（主入口）
+│   │       ├── execution-player/   ★ 分步执行演示播放器
+│   │       ├── step-editor/        步骤精修（表单 + 「Ask AI」）
+│   │       └── export-panel/       发布网页 / 导出 MP4
+│   ├── api/
+│   │   └── src/
+│   │       ├── routes/ai/          POST /ai/chat, /ai/regenerate-step (SSE)
+│   │       ├── routes/workflows/   POST /workflows/execution/run
+│   │       └── workers/            ai-generation, explain, render
+│   └── renderer/
 ├── packages/
-│   ├── demo-schema/         # Zod Schema + 版本迁移 + 导出校验
-│   ├── viz-primitives/      # PlanTree, ERDiagram, BPlusTree, TransactionTimeline
-│   ├── db-engine/           # MySQL/PG 沙箱 EXPLAIN → 统一 IR
-│   ├── sql-analyzer/        # 解析、错误定位、步骤候选
-│   ├── llm-pipeline/        # 课纲-aware 提示词、结构化 JSON 输出
-│   ├── subtitle-kit/        # 中英 SRT/VTT、时间轴对齐校验
-│   ├── lms-bridge/          # LTI 1.3 + 超星 embed
-│   └── curriculum/          # 8 大类课纲模板 + Phase 标记
+│   ├── ai-orchestrator/            ★ Agent 编排、会话、Tool Calling
+│   ├── ai-tools/                   ★ LLM 工具：EXPLAIN、课纲、SQL、步骤
+│   ├── execution-workflow/         ★ 执行演示状态机 + 步骤 DAG
+│   ├── llm-pipeline/               提示词、结构化 JSON、降级
+│   ├── prompt-registry/            Prompt 版本管理
+│   ├── demo-schema/                DemoPackage Schema
+│   ├── db-engine/                  MySQL/PG 沙箱
+│   ├── sql-analyzer/
+│   ├── viz-primitives/
+│   ├── subtitle-kit/
+│   ├── lms-bridge/
+│   └── curriculum/
 └── infra/
-    └── docker-compose.yml   # api + web + pg + redis + minio + mysql + pg-sandbox
 ```
 
-| 模块 | 职责 |
-|---|---|
-| **demo-schema** | 定义 `DemoPackage` / `DemoStep`；网页 Player 与 Remotion 的唯一输入 |
-| **viz-primitives** | React 可视化原语；Player 与 Renderer **共用**，保证画面对齐 |
-| **db-engine** | Docker 内只读 MySQL/PG；`EXPLAIN FORMAT=JSON`；归一化 + diff |
-| **llm-pipeline** | 输入课纲节点 + SQL → 结构化步骤 + 中英讲解词；失败降级手写 |
-| **api** | 编排：生成 → 编辑 → 发布 → 导出 → LMS；异步任务入 BullMQ |
-| **web** | 三场景 UX；步骤编辑器；导出面板；课堂快捷键（空格/←/→） |
-| **renderer** | 读 DemoPackage 时间轴 → MP4 + 字幕文件 |
+| 模块 | 职责 | AI 相关 |
+|---|---|---|
+| **ai-studio** | 对话 UI、流式预览、快捷指令（「简化」「加一步 EXPLAIN」） | **核心入口** |
+| **ai-orchestrator** | 多轮 Agent；维护 `AiSession` + `DemoPackage` 草稿 | **大脑** |
+| **ai-tools** | 注册 LLM 可调用工具；返回 grounding 数据 | **手与眼** |
+| **execution-workflow** | SQL/概念 → 标准步骤 DAG；校验 EXPLAIN 覆盖 | **执行演示引擎** |
+| **llm-pipeline** | 结构化输出、单步重写、双语、失败降级 | **文案与脚本** |
+| **execution-player** | 按工作流步骤播放；高亮当前 EXPLAIN 节点 | **课堂核心 UX** |
+| **demo-schema** | 单一真相源；含 `workflowTrace` 字段 | 可追溯 AI 生成链 |
+| **renderer** | DemoPackage → MP4（步骤与 Player 一致） | 导出 |
 
 ### 核心接口定义
 
 ```typescript
-// packages/demo-schema — 单一真相源
+// packages/demo-schema — 扩展 AI 与工作流追溯
 interface DemoPackage {
   id: string;
   curriculumNodeId: string;
-  templateType:
-    | 'sql-explain'
-    | 'er-model'
-    | 'normalization'
-    | 'transaction'
-    | 'bplus-tree'
-    | 'storage-recovery'
-    | 'concept-generic';
+  templateType: DemoTemplateType;
   title: { zh: string; en: string };
   steps: DemoStep[];
-  engineCompare?: {
-    mysql?: ExplainSnapshot;
-    postgres?: ExplainSnapshot;
-    simplificationNotes?: string[];
+  workflowTrace?: {
+    workflowId: string;
+    workflowType: 'sql-execution' | 'concept-progression';
+    aiSessionId: string;
+    grounding: { mysql?: string; postgres?: string }; // EXPLAIN 快照 ID
   };
+  engineCompare?: { mysql?: ExplainSnapshot; postgres?: ExplainSnapshot };
   metadata: {
     aiDraftVersion?: string;
     teacherVersion: number;
-    publishedAt?: string;
+    lastAiAction?: 'full-generate' | 'regenerate-step' | 'teacher-edit';
   };
-  playback: {
-    defaultStepDurationMs: number;
-    subtitles: SubtitleTrack[];
-  };
+  playback: { defaultStepDurationMs: number; subtitles: SubtitleTrack[] };
 }
 
 interface DemoStep {
   id: string;
   order: number;
+  workflowPhase?: 'lex' | 'parse' | 'optimize' | 'plan' | 'execute' | 'result' | 'concept';
   narration: { zh: string; en: string; source: 'ai' | 'teacher' };
-  visuals: VisualSpec; // 引用 viz-primitives 类型
-  timing: { durationMs: number; pauseAfterMs?: number };
+  visuals: VisualSpec;
+  groundingRef?: string; // 指向 EXPLAIN 节点或课纲锚点
+  timing: { durationMs: number };
 }
 ```
 
 ```typescript
-// apps/api — REST 核心端点（命名：kebab-case 路径 + camelCase JSON）
-POST   /demos/generate          // body: { curriculumNodeId, sql?, conceptNotes? }
-PATCH  /demos/:id/steps/:stepId // 教师编辑单步
-POST   /demos/:id/publish       // → { playerUrl }
-POST   /demos/:id/export/video  // 异步 → { jobId } → { mp4Url, subtitles[] }
-GET    /demos/:id               // 学生只读 / 教师编辑
-POST   /lms/launch-config       // → { ltiUrl | embedUrl }
-GET    /jobs/:id                // 生成/渲染任务状态
+// packages/ai-orchestrator — Agent 核心 API
+interface AiOrchestrator {
+  /** 流式对话：教师自然语言 → 增量更新 DemoPackage */
+  chat(sessionId: string, message: string): AsyncIterable<AiStreamEvent>;
+
+  /** 只重生成单步（不整包重来） */
+  regenerateStep(sessionId: string, demoId: string, stepId: string, hint?: string): Promise<DemoStep>;
+
+  /** 触发完整执行演示工作流 */
+  runExecutionWorkflow(input: WorkflowInput): Promise<WorkflowResult>;
+}
+
+type AiStreamEvent =
+  | { type: 'text-delta'; content: string }
+  | { type: 'tool-call'; tool: string; args: unknown }
+  | { type: 'step-preview'; step: DemoStep }
+  | { type: 'workflow-phase'; phase: string; status: 'running' | 'done' }
+  | { type: 'demo-updated'; demo: DemoPackage }
+  | { type: 'error'; message: string };
 ```
 
 ```typescript
-// packages/db-engine
-interface DbEngineService {
-  explainMySQL(sql: string): Promise<ExplainSnapshot>;
-  explainPostgres(sql: string): Promise<ExplainSnapshot>;
-  diffPlans(mysql: ExplainSnapshot, pg: ExplainSnapshot): EngineDiff;
-}
-
-// packages/llm-pipeline
-interface LlmPipeline {
-  generateSteps(input: GenerateInput): Promise<DemoStep[]>;
-  translateNarration(zh: string): Promise<string>; // 英译，可选
-}
+// packages/ai-tools — LLM Tool 定义（OpenAI function calling 兼容）
+const AI_TOOLS = [
+  'curriculum_search',      // 课纲 RAG：检索章节与示例
+  'sql_analyze',            // 语法树 + 错误定位
+  'explain_mysql',          // MySQL EXPLAIN JSON
+  'explain_postgres',       // PostgreSQL EXPLAIN JSON
+  'assemble_execution_steps', // execution-workflow 入口
+  'generate_narration',     // 单步/多步讲解词
+  'generate_visual_spec',   // 动画脚本 → VisualSpec
+  'translate_bilingual',    // 中英互译
+  'validate_demo_package',  // Schema + grounding 校验
+] as const;
 ```
 
-### 数据流
+```typescript
+// apps/api — REST + SSE
+POST   /ai/sessions                    // 创建 AI 会话
+POST   /ai/sessions/:id/chat           // SSE 流式对话（主交互）
+POST   /ai/sessions/:id/regenerate-step // 单步 AI 重写
+POST   /workflows/execution            // 触发执行演示工作流（可脱离对话直接调用）
+GET    /demos/:id                      // 含 workflowTrace
+POST   /demos/:id/publish
+POST   /demos/:id/export/video         // 异步 MP4
+```
+
+### 数据流（AI 交互式生成）
 
 ```mermaid
 sequenceDiagram
     actor T as 教师
-    participant W as apps/web
-    participant A as apps/api
-    participant L as llm-pipeline
-    participant D as db-engine
-    participant R as apps/renderer
-    participant S as 对象存储
+    participant UI as ai-studio
+    participant Agent as ai-orchestrator
+    participant Tools as ai-tools
+    participant WF as execution-workflow
+    participant DB as db-engine
+    participant LLM as LLM API
 
-    T->>W: 选课纲节点 + 输入 SQL/概念
-    W->>A: POST /demos/generate
-    par 并行
-        A->>L: 生成讲解词 + 步骤初稿
-        A->>D: EXPLAIN MySQL & PostgreSQL
+    T->>UI: 「用 MySQL 讲这个 JOIN 怎么执行」+ SQL
+    UI->>Agent: POST /ai/chat (SSE)
+
+    Agent->>LLM: 意图识别 + 规划
+    Agent->>Tools: curriculum_search(课纲)
+    Agent->>Tools: sql_analyze(SQL)
+    Agent->>Tools: explain_mysql + explain_postgres
+    Tools->>DB: EXPLAIN 沙箱
+    DB-->>Tools: 计划 JSON
+
+    Agent->>WF: assemble_execution_steps
+    WF-->>Agent: ExecutionStep[] DAG
+
+    loop 流式生成每步
+        Agent->>LLM: generate_narration(step, grounding)
+        Agent-->>UI: step-preview (SSE)
+        UI-->>T: 实时 Player 预览
     end
-    L-->>A: DemoStep[] draft
-    D-->>A: 计划 JSON + 差异标注
-    A-->>W: DemoPackage v0
 
-    T->>W: 编辑任一步文案/动画/时长
-    W->>A: PATCH /demos/:id/steps/:stepId
-    A-->>W: DemoPackage v1
+    T->>UI: 「第 3 步讲简单点，面向大一」
+    UI->>Agent: regenerate-step(3, hint)
+    Agent->>LLM: 单步重写
+    Agent-->>UI: demo-updated
 
-    T->>W: 发布网页
-    W->>A: POST /demos/:id/publish
-    A->>S: player 静态资源
-    A-->>W: /player/:id
-
-    T->>W: 导出 MP4
-    W->>A: POST /demos/:id/export/video
-    A->>R: BullMQ 任务
-    R->>S: demo.mp4 + zh.srt + en.srt
-    A-->>W: 下载链接
+    T->>UI: 定稿 → 发布 / 导出 MP4
 ```
-
-**关键原则：** 网页 Player 与 Remotion **读取同一份 DemoPackage**，共用 `viz-primitives`，导出前运行 schema 一致性校验。
 
 ### 优点 / 缺点
 
 | 优点 | 缺点 |
 |---|---|
-| 网页与 MP4 **天然同源**，满足 Q1 双交付验收 | Monorepo 初期搭建成本（pnpm + Turborepo） |
-| TS 全栈，Player 与 Remotion **共享 React 组件** | Remotion 渲染耗资源，需异步队列 |
-| 模块边界清晰，Phase 1 可纵向切片交付 | MySQL/PG Docker 沙箱增加运维复杂度 |
-| LLM / EXPLAIN / 渲染均可独立降级 | LTI 1.3 集成有一定学习曲线 |
-| 与 `01_AI_Dev_Workflow_Kit` **零耦合**，独立演进 | — |
+| **AI 交互**是主路径，符合产品定位 | Agent + Tool 编排复杂度高 |
+| EXPLAIN **grounding** 降低幻觉 | 需设计清晰的流式 UX 与错误恢复 |
+| 单步重生成本低于整包 | Prompt 版本管理需 discipline |
+| 执行工作流可独立测试 | Phase 1 需优先做 AI Studio PoC |
+| 同源 DemoPackage → 网页 + MP4 | — |
 
 ---
 
-## 2. 方案 B（备选）— Python 后端 + Puppeteer 录屏 + 多仓库
+## 2. 方案 B（备选）— 表单批量生成 + 后置 AI 润色
 
 ### 模块划分
 
 ```text
-db-demo-web/          # React 前端（独立仓库）
-db-demo-api/          # Python FastAPI：CRUD + LLM（LangChain）+ 任务
-db-demo-worker/       # Celery：EXPLAIN 子进程 + Puppeteer 录屏
-db-demo-schema/       # JSON Schema（pip package，版本独立发布）
+apps/web/form-wizard/     # 表单：选课纲 → 填 SQL → 点「生成」
+packages/batch-generator/   # 一次性 LLM 调用 → DemoPackage
+packages/db-engine/         # EXPLAIN（生成后附加，非 Agent 调度）
 ```
 
-| 模块 | 职责 |
-|---|---|
-| **FastAPI** | REST + Celery 任务；sqlparse + psycopg2/mysql-connector EXPLAIN |
-| **LangChain** | LLM 编排、课纲 RAG（可选）、结构化输出 |
-| **Puppeteer Worker** | 打开 Player URL → 逐步录屏 → ffmpeg 合并 + 字幕后期对齐 |
-| **React Web** | 同方案 A 三场景 UX |
+### 核心接口
 
-### 核心接口定义
-
-```python
-# db-demo-api/schemas/demo.py
-class DemoPackage(BaseModel):
-    id: str
-    curriculum_node_id: str
-    template_type: str
-    steps: list[DemoStep]
-    engine_compare: EngineCompare | None = None
-
-# FastAPI routes
-POST /api/v1/demos/generate
-PATCH /api/v1/demos/{demo_id}/steps/{step_id}
-POST /api/v1/demos/{demo_id}/export/video  # → Celery task → Puppeteer
-```
-
-```python
-# db-demo-worker/tasks.py
-@celery.task
-def render_video(demo_id: str) -> str:
-    """Puppeteer 打开 player，按步骤录屏，ffmpeg 烧字幕"""
-    ...
+```typescript
+POST /demos/generate  // 单次请求，无 SSE，无对话
+PATCH /demos/:id/steps/:stepId  // 仅表单编辑，无「Ask AI」
+POST /demos/:id/polish  // 可选：整包 AI 润色讲解词
 ```
 
 ### 数据流
 
 ```text
-教师输入 → FastAPI → LangChain 生成步骤 + 子进程 EXPLAIN
-         → 存入 PostgreSQL
-         → 教师编辑 → 发布 Player URL
-         → Celery 触发 Puppeteer 录屏 → ffmpeg 后期贴字幕 → S3
+表单提交 → 并行(LLM 一次性输出 + EXPLAIN) → DemoPackage → 手工编辑 → 导出
 ```
-
-网页与视频**不共享渲染内核**：视频是「录出来的」，不是「渲染出来的」。
 
 ### 优点 / 缺点
 
 | 优点 | 缺点 |
 |---|---|
-| Python AI 生态（LangChain）更丰富 | **网页与 MP4 易漂移**（字体/GPU/分辨率/步进时机） |
-| FastAPI 开发速度快 | 三仓库版本对齐成本高 |
-| Puppeteer PoC **极快**（1–2 天可出 demo） | 字幕时间轴需 ffmpeg 后期对齐，**双语同步难** |
-| EXPLAIN 用 psycopg2 很成熟 | Remotion 级确定性帧质量达不到 |
-| 团队若 Python 为主，上手快 | 与 TS 前端维护两套类型定义 |
+| 实现快（2–3 周 MVP） | **无 AI 交互**，不符合「对话式生成」定位 |
+| LLM 调用次数少、成本低 | 改一步常需整包重生成 |
+| 无 Agent 调试负担 | 执行工作流与 AI 解耦，步骤易幻觉 |
+| — | 难以突出 AI 产品差异化 |
 
 ---
 
 ## 3. 方案对比表
 
-| 维度 | **方案 A（Monorepo + Remotion）** | **方案 B（Python + Puppeteer）** |
+| 维度 | **A：AI Agent + 执行工作流** | **B：表单批量 + 后置润色** |
 |---|---|---|
-| **复杂度** | 中 — 单仓 + 共享包 | 中高 — 三仓 + 跨语言类型 |
-| **可扩展性** | **高** — 加课纲模板 = 加 viz-primitives | 中 — 录屏方案难扩展非 Web 动画 |
-| **维护成本** | **低** — 单 PR 改 schema/UI/渲染 | 高 — 三仓同步 + 字幕对齐脚本 |
-| **双交付一致性** | **高** — 同源 DemoPackage + 共享组件 | 低 — 录屏依赖运行时环境 |
-| **LLM 集成** | 够用（openai SDK / 国产 API） | **强**（LangChain 生态） |
-| **MP4 质量** | **高** — 矢量、确定性帧 | 中 — 依赖录屏环境 |
-| **双语字幕** | **原生时间轴** | 需后期 ffmpeg，易不同步 |
-| **LMS 集成** | 同等（LTI 语言无关） | 同等 |
-| **Phase 1 速度** | 中 — 2 周出 Player PoC | **快** — 3 天出录屏 PoC |
-| **生产可用性** | **适合 Q9 真实教学产品** | 适合早期 demo，难达验收 |
-| **风险** | Remotion 学习曲线 | **视频漂移**（最大风险） |
+| **AI 交互体验** | **强** — 对话、流式、单步重写 | 弱 — 一键生成 |
+| **执行演示 fidelity** | **高** — Workflow + EXPLAIN grounding | 中 — EXPLAIN 可能未参与步骤拆分 |
+| **复杂度** | 中高 | 低 |
+| **可扩展性** | **高** — 加工具即可扩展课纲 | 低 |
+| **维护成本** | 中 — Prompt/Tool 版本化 | 低 |
+| **MP4/网页一致** | **高**（DemoPackage 同源） | 高 |
+| **产品差异化** | **AI 原生教学演示平台** | 普通演示工具 |
+| **Phase 1 推荐** | **✅ 推荐** | 仅作技术 Spike，不作主路径 |
 
 ---
 
 ## 4. 推荐方案及理由
 
-**推荐方案 A：TypeScript Monorepo + DemoPackage 单一真相源 + Remotion 渲染。**
+**推荐方案 A：AI Agent + Execution Workflow + DemoPackage 同源渲染。**
 
-| 理由 | 对应需求 |
+| 理由 | 说明 |
 |---|---|
-| Q1 要求 MP4 **与** 交互网页步骤一致 | 只有同源 Schema + 共享 viz 组件能可靠满足 |
-| Q2/Q3 教师编辑后双出口同步 | 改 DemoPackage 一次，Player 与 Renderer 同读 |
-| Q4 双引擎 EXPLAIN | `db-engine` 包独立，与渲染栈无关 |
-| Q9 真实教学产品 | 需可维护、可版本化、可重复导出 |
-| Q10 双语字幕 | Remotion 时间轴原生对齐，优于 ffmpeg 后期 |
-| 与现有仓库兼容 | 新建 `02_DB_Demo_Studio/`，不改动 `01_*` |
+| 用户明确要求 | **AI 交互式生成** + **执行演示工作流** 是核心功能，非附加 |
+| 降低幻觉 | Agent 必须通过 `explain_*` 工具 grounding，工作流约束步骤结构 |
+| 教师效率 | 对话改单步比重跑整包更符合备课习惯 |
+| 双交付 | DemoPackage 仍驱动 Player + Remotion |
+| 学习项目价值 | 覆盖 Agent、Tool Use、SSE、工作流引擎——可写入作品集 |
 
-**方案 B 的适用场景（YAGNI 保留）：** 仅作 **Phase 0 极早 demo**（3 天内验证「教师是否愿意逐步看 SQL」），**不进入 Phase 1 生产路径**。
+**方案 B** 仅用于 **1 周 Spike** 验证 EXPLAIN → PlanTree 可视化，**不**作为产品主架构。
 
 ---
 
-## 5. 实施步骤（分阶段，每阶段可独立交付）
+## 5. 实施步骤（AI 优先，分阶段可交付）
 
-### Phase 0 — 文档与骨架（当前）
+### Phase 0 — 文档（当前）
 
-| 交付物 | 可独立验收 |
-|---|---|
-| 需求澄清 Q1–Q10 | ✅ 已完成 |
-| 架构文档（本文） | ✅ |
-| `02_DB_Demo_Studio/` 目录 + README | ✅ |
-| 课纲—模板映射表 | [`curriculum-mapping.md`](./curriculum-mapping.md) |
+- [x] 需求 Q1–Q10
+- [x] 架构 v2（本文）+ [`ai-workflow.md`](./ai-workflow.md)
 
-### Phase 1 — 纵向切片（可进课堂试用，约 8–10 周）
+### Phase 1 — AI 纵向切片（约 8–10 周）
 
-| 步骤 | 交付物 | 独立验收 |
+| 顺序 | 交付物 | 验收 |
 |:---:|---|---|
-| **1** | `demo-schema` + 手写 JSON + 网页 Player 逐步播放 | 浏览器 ←/→/空格 控制 3 步 |
-| **2** | `db-engine` MySQL EXPLAIN 沙箱 → PlanTree 渲染 | Docker 内 EXPLAIN JSON → 可视化 |
-| **3** | `llm-pipeline` 课纲 + SQL → ≥3 步 + 讲解词（60s） | API 返回结构化 DemoPackage draft |
-| **4** | 教师编辑闭环（PATCH step） | 改文案后 Player 即时更新 |
-| **5** | `renderer` Remotion → MP4 + zh/en SRT | 与 Player 画面对齐抽查 |
-| **6** | 非 SQL 模板 ×3（ER、范式、事务） | 各 1 条端到端 |
-| **7** | `lms-bridge` Moodle LTI **或** 超星 iframe | 课程页打开只读演示 |
-| **8** | 三场景 UX + 学生只读链接 | RBAC 验证 |
-| **9** | 1 名教师 10 分钟端到端试用 | 复现需求 §6 验收标准 |
+| **1** | `demo-schema` + `execution-player` 手动 JSON 播放 | 分步展示 5 个 workflowPhase |
+| **2** | `db-engine` + `execution-workflow`（SQL 路径） | EXPLAIN → 步骤 DAG |
+| **3** | `ai-tools`（explain_* + assemble_steps） | 工具单测通过 |
+| **4** | `ai-orchestrator` + **AI Studio** SSE 对话 | 对话生成 ≥3 步初稿 ≤60s |
+| **5** | **单步 regenerate-step** | 「讲简单点」只改一步 |
+| **6** | 教师定稿 + `renderer` MP4 + 字幕 | 与 Player 对齐 |
+| **7** | 非 SQL 工作流 ×3（ER/范式/事务） | concept-progression 工作流 |
+| **8** | LMS 试嵌入 + 三场景 UX | 同 v1 验收 |
 
-**Phase 1 刻意不做（YAGNI）：** 全校 SSO、LMS 成绩簿、双 TTS 音轨、全课纲 100% 覆盖、K8s 生产部署。
+**Phase 1 YAGNI：** 向量课纲 RAG 可先用静态 JSON；复杂 multi-agent；双 TTS 音轨。
 
-### Phase 2 — 教学产品完善
+### Phase 2 — AI 与产品深化
 
-| 增量 | 目标 |
-|---|---|
-| 课纲 8 大类模板 100% | B+ 树、存储恢复、锁深度动画 |
-| 双引擎完整 | MySQL **与** PG 并排/切换全可用 |
-| 双语 TTS + 字幕编辑器 | 导出格式完备 |
-| 多 LMS | Moodle + 超星双验 |
-| 案例库版本化 | 跨学期复用 |
-| 校内私有化 | K8s + 备份 + 审计 |
+- 课纲向量 RAG + 教材 PDF 检索
+- 学生端 **AI 问答**（基于已发布 DemoPackage grounding，可选）
+- 双语 TTS；案例库 + Prompt A/B 测试
+- 多 LMS；执行工作流可视化编辑器
 
 ---
 
 ## 6. 风险与缓解措施
 
-| 风险 | 影响 | 缓解 |
-|---|---|---|
-| LLM 讲解词不准确 | 教学误导 | 教师必可编辑；发布前校对提示；AI/定稿版本对比 |
-| 网页与 MP4 不同步 | 验收失败 | 单一 DemoPackage；共享 viz-primitives；导出前自动 diff |
-| Remotion 渲染慢/失败 | 体验差 | 异步队列；720p 默认；**网页发布不依赖 MP4** |
-| MySQL/PG 计划差异大 | 学生困惑 | 并排 + 文案解释；标注「教学简化」 |
-| LMS CSP / iframe 拒绝 | 无法嵌入 | 独立分享链接 fallback；域名白名单文档 |
-| 付费 API 限流/故障 | 生成中断 | 重试 + 队列；降级纯手写文案 |
-| 敏感 SQL 外泄 | 合规 | 默认禁止外呼；校内 API 端点；审计日志 |
-| 范围膨胀（全课纲一次做完） | 延期 | Phase 1 纵向切片；课纲映射表排优先级 |
-| 沙箱 SQL 注入 | 安全 | 只读账号；白名单 SELECT/EXPLAIN；5s 超时 kill |
+| 风险 | 缓解 |
+|---|---|
+| LLM 步骤幻觉 | **强制** `explain_*` + `validate_demo_package` 工具；无 grounding 的步骤拒绝发布 |
+| Agent 循环/超时 | 最大工具调用 10 次；60s 硬超时；降级为「仅 EXPLAIN + 模板步骤」 |
+| 流式 UX 混乱 | 分阶段事件：`workflow-phase` → `step-preview` → `demo-updated` |
+| AI 成本 | 单步 regenerate；缓存 EXPLAIN；会话级 token 预算 |
+| 讲解不准确 | 教师必可编辑；`source: ai \| teacher` 标记；发布前校对提示 |
+| 网页/MP4 不一致 | 同源 DemoPackage + 共享 viz |
 
 ---
 
-## 附录：与 workflow kit 的复用关系
+## 附录
 
-| 可复用 | 不可复用 |
-|---|---|
-| `prompts/requirements.md` / `architecture.md` 模板流程 | `ai_commit_review.py` 运行时 |
-| Docker Compose 经验 | Workflow Kit 的 LLM 配置 |
-| Daily Log / 学习记录习惯 | — |
+- AI 工作流详设：[`ai-workflow.md`](./ai-workflow.md)
+- 课纲映射：[`curriculum-mapping.md`](./curriculum-mapping.md)
+- 与 `01_AI_Dev_Workflow_Kit`：复用 Prompt/Agent **方法论**；运行时零耦合
 
 ---
 
@@ -372,4 +465,5 @@ def render_video(demo_id: str) -> str:
 
 | 日期 | 变更 |
 |---|---|
-| 2026-06-01 | 初稿：按 architecture 模板输出方案 A/B、对比、实施步骤、风险 |
+| 2026-06-01 | v1：方案 A/B 初稿 |
+| 2026-06-01 | **v2：AI 优先** — Agent、执行工作流、AI Studio、ai-orchestrator/ai-tools 模块 |

@@ -10,6 +10,7 @@
 | 项目 | 阶段 | 状态 | 目录 |
 |---|---|---|---|
 | AI Dev Workflow Kit | M1 W1 | Building | [`01_AI_Dev_Workflow_Kit/`](01_AI_Dev_Workflow_Kit/) |
+| DB Demo Studio | 独立学习项目 | Phase 0 — 文档就绪 | [`02_DB_Demo_Studio/`](02_DB_Demo_Studio/) |
 | Paper RAG Assistant | M1 W2-4 | Not Started | `06_RAG_Research_Assistant/` |
 | Personal MCP Server | M2 W5-6 | Not Started | `07_MCP_Server/` |
 | Mini Agent Framework | M2 W7-8 | Not Started | `08_Mini_Agent_Framework/` |
@@ -28,6 +29,7 @@ Agent_System/
   00_Notes/             概念笔记、论文笔记、实验记录
   00_Portfolio/         简历、面试故事、Demo 索引
   01_AI_Dev_Workflow_Kit/
+  02_DB_Demo_Studio/           数据库课演示工具（独立学习项目）
   06_RAG_Research_Assistant/   (M1 创建)
   07_MCP_Server/               (M2 创建)
   08_Mini_Agent_Framework/     (M2 创建)

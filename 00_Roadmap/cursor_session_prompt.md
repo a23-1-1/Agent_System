@@ -9,7 +9,7 @@
 | 方式 | 要不要用 | 说明 |
 |---|---|---|
 | **Git 分支** | ❌ 日常学习不需要 | 继续用 `main`，每天 commit 即可 |
-| **Git 分支** | ✅ 仅实验性重构时 | 如 `exp/rag-chunk-v2`，失败可删 |
+| **Git 分支** | ✅ 仅实验性重构时 | 如 `exp/db-demo-player-v2`，失败可删 |
 | **Cursor 新对话** | ✅ 推荐 | 每 3-5 天或每个 Phase 开新对话 |
 
 **结论：代码不用建分支，对话要定期新开。**
@@ -27,7 +27,7 @@
 
 继续当前对话：
 
-- ✅ 同一个小任务没做完（如今天的 ai_commit_review 实战）
+- ✅ 同一个 PoC/功能没做完（如 DB Demo Player 步进未验收）
 - ✅ 需要引用刚才的错误/代码上下文
 
 ---
@@ -40,6 +40,8 @@
    - `@AI_Learning_Management_Plan.md`
    - `@00_Roadmap/3month_full_plan.md`
    - `@00_Roadmap/weekly_plan.md`
+   - `@02_DB_Demo_Studio/README.md`
+   - `@00_Roadmap/day{N}_{YYYY-MM-DD}_guide.md` 或 `@00_Roadmap/day1_guide.md`
    - `@00_Learning_Logs/daily/` 最新一篇日志
 3. 粘贴下方 **「新对话启动提示词」**
 4. 补充一行：**「今天是 Phase X / WY / Day Z，当前任务是：___」**
@@ -54,36 +56,35 @@
 ## 背景
 - 身份：资深程序员 + 准研究生
 - 目标：求职竞争力 + 科研能力（Agent / RAG / MCP / Skill / Coding Agent）
-- 仓库：d:\AI_Projects\01_Research\Agent_System（已 push 到 GitHub a23-1-1/Agent_System）
+- 仓库：d:\AI_Projects\01_Research\Agent_System（已 push 到 GitHub）
 - 计划：12 个月学习内容完整保留，3 个月加速完成（见 3month_full_plan.md）
 - 原则：内容不砍、验收不降；项目驱动；每天必须有可追踪产出（笔记/代码/commit/log）
 
 ## 当前进度
 - Phase：Phase 1 — AI 辅助开发工作流
 - 周次：W1
-- 日次：Day 1
-- 项目：01_AI_Dev_Workflow_Kit
-- 已完成：学习管理系统、Git 初始化、首次 push、prompt 模板骨架
-- 待完成：scenarios 个人化、首次 AI 实战、5 条使用记录、Phase1 验收
+- 实战代码库：02_DB_Demo_Studio（DB 课演示工具，PoC #1 进行中）
+- 工作流工具包：01_AI_Dev_Workflow_Kit（prompts、workflow.md、可选 ai_commit_review）
+- 已完成：学习管理体系、需求/架构文档、Kit 审查脚本（侧车）
+- 待完成：Studio PoC #1、5 条使用记录（Studio logs 优先）、Phase1 验收
 
 ## 学习规范
 1. 先读 @00_Roadmap/weekly_plan.md 和最新 daily log，再给今日任务
-2. 带我「学概念 → 写代码/实战 → 写 log → git commit」，不要只给理论
-3. 代码改动遵循仓库现有风格；不擅自 commit，我确认后再提交
-4. 每天结束帮我更新 daily log 要点和 commit message 建议
-5. 未达标不进入下一 Phase（验收见 3month_full_plan.md）
+2. 带我「学概念 → 在 02_DB_Demo_Studio 实战 → 写 log → git commit」，不要只给理论
+3. Prompt 用 01_AI_Dev_Workflow_Kit/prompts/；代码改动在 02_DB_Demo_Studio/
+4. 不擅自 commit，我确认后再提交
+5. 每天结束帮我更新 daily log 要点和 commit message 建议
+6. 未达标不进入下一 Phase（验收见 3month_full_plan.md）
 
 ## 今天请从这里开始
 请先确认我最新的 daily log 和 git 状态，然后给出今天 2-3 小时的执行清单（含具体文件路径和验收标准）。
 
-我今天的任务是：【在这里填，例如：Day1 首次 AI 实战 — ai_commit_review 接入 LLM】
+我今天的任务是：【例如：Day2 — 用 architecture.md 细化 demo-schema，产出 02_DB_Demo_Studio/logs/ 记录】
 ```
 
 ---
 
 ## 5. 各 Phase 切换时的补充句
-
-粘贴启动提示词后，把「当前进度」和最后一行换成对应内容：
 
 **Phase 1 → Phase 2（W2 开始）**
 ```text
@@ -107,12 +108,11 @@
 
 ## 6. 快捷版提示词（日常续学用）
 
-对话还清晰、只是隔天继续时用：
-
 ```markdown
-继续 Agent_System 学习。请先读 @00_Learning_Logs/daily/ 最新日志和 @00_Roadmap/weekly_plan.md。
+继续 Agent_System 学习。请先读 @00_Learning_Logs/daily/ 最新日志、@02_DB_Demo_Studio/README.md 和 @00_Roadmap/weekly_plan.md。
 
 今天：Phase 【】/ W【】/ Day【】，任务：【】。
+实战目录：02_DB_Demo_Studio/；模板：01_AI_Dev_Workflow_Kit/prompts/。
 带我完成：学概念 → 实战 → 写 log → 建议 commit message。不要 commit 除非我要求。
 ```
 
@@ -124,6 +124,7 @@
 Cursor 新对话  = 短期记忆（3-5 天）
 Git commit     = 长期记忆（永久可追溯）
 Daily Log      = 每日快照（新对话必读）
+02_DB_Demo_Studio/logs/ = Phase 1 实战记录（新对话建议 @）
 Roadmap 文件   = 总导航（新对话 @ 引用）
 ```
 

@@ -17,7 +17,7 @@
 | Multi-Agent 独立项目 | 作为 Agent 项目扩展（可选） |
 
 **3 个月后你应该有的能力：**
-- 用 AI 高效开发（Workflow Kit）
+- 用 AI 高效开发（Workflow Kit 模板 + DB Demo Studio 实战）
 - 构建并评估 RAG 系统
 - 自研 MCP Server
 - **自研 Mini Agent 框架**（核心竞争力）
@@ -38,16 +38,18 @@ M3 (W9-W12)  Coding Agent → 整合 + 作品集
 
 ## Month 1：AI 工作流 + RAG（W1-W4）
 
-### Week 1 — AI Dev Workflow Kit
+### Week 1 — AI 工作流 + DB Demo Studio PoC
 
 | 天 | 任务 | 产出 |
 |---|---|---|
-| D1-D2 | 完善 5 个 prompt 模板 + 1 次实战 | 模板 + 1 条 log |
-| D3-D4 | 小功能编码闭环（需求→测试） | 1 个 commit |
-| D5 | `ai_commit_review.py` 接入 LLM | 可运行脚本 |
-| D6-D7 | README + 阶段复盘 | 项目 v1 |
+| D1-D2 | Prompt 实战（需求/架构）+ `scenarios.md` | 模板验证 + Studio `logs/` |
+| D3-D4 | **PoC #1**：DemoPackage JSON + Player 步进 | `02_DB_Demo_Studio/` commit |
+| D5 | 可选 `ai_commit_review.py` 审查 Studio diff | 审查报告 |
+| D6-D7 | `workflow.md` + README + 阶段复盘 | Kit v1 + Studio PoC 可演示 |
 
-**验收**：5 条使用记录 + 3 分钟能讲 AI 工作流
+**验收**：5 条使用记录 + PoC #1 可演示 + 3 分钟能讲 AI 在 Studio 开发中的作用
+
+详见 [`weekly_plan.md`](weekly_plan.md) Week 1 分解。
 
 ### Week 2 — Paper RAG v1（解析 + 入库）
 

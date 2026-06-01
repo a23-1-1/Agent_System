@@ -15,11 +15,14 @@
 
 {{粘贴澄清后的需求，或 requirements.md 的输出}}
 
+这是requirements.md 的输出D:\AI_Projects\01_Research\Agent_System\00_Notes\requirements\db_demo_video_requirements.md
+设计这个功能的架构方案
 ## 现有系统上下文
 
-- 技术栈：{{语言、框架、数据库等}}
-- 相关模块：{{文件路径或模块名}}
-- 约束：{{性能、兼容性、团队规范等}}
+- 技术栈：
+- 相关模块：
+- 约束：
+使用D:\AI_Projects\01_Research\Agent_System\00_Notes\requirements\db_demo_video_requirements.md的要求
 
 ## 请输出
 

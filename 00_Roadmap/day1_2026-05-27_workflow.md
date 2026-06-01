@@ -1,5 +1,6 @@
 # Day 1 学习流程复盘 — Phase 1 启动
 
+> 文件名：`day1_2026-05-27_workflow.md`  
 > 日期：2026-05-27  
 > 阶段：Phase 1 / W1 / Day 1  
 > 主题：学习管理系统 + 首次 AI 辅助开发实战  
@@ -161,4 +162,4 @@ python scripts/ai_commit_review.py --unstaged
 | 使用记录 | `01_AI_Dev_Workflow_Kit/logs/2026-05-27_ai_commit_review.md` |
 | 审查报告 | `01_AI_Dev_Workflow_Kit/logs/review_20260601_012246.md` |
 | 学习约束 | `00_Roadmap/learning_constraints.md` |
-| 明日指南 | `00_Roadmap/day2_guide.md` |
+| 明日指南 | `00_Roadmap/day2_2026-05-28_guide.md` |

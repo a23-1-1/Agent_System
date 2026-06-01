@@ -26,7 +26,7 @@
 
 | 周 | Phase | 原版周期 | 本周必须完成的全部内容 | 项目产出 |
 |---|---|---|---|---|
-| **W1** | Phase 1 | 2-4 周 | AI 编程工具、7 类开发任务、Git+AI 工作流、5 条使用记录 | AI Dev Workflow Kit |
+| **W1** | Phase 1 | 2-4 周 | AI 编程工具、7 类开发任务、Git+AI 工作流、5 条使用记录 | **DB Demo Studio**（代码）+ AI Dev Workflow Kit（模板/工具） |
 | **W2** | Phase 2 上 | 4-6 周 | LLM API、Streaming、Structured Output、Embedding、向量库、Chunking | Paper RAG v1 |
 | **W3** | Phase 2 中 | | BM25、Hybrid Search、HNSW、PDF 解析、基础问答 | Paper RAG 检索优化 |
 | **W4** | Phase 2 下 | | Rerank、RAG Evaluation、3 种 chunk 对比实验、引用定位 | Paper RAG v2 + 实验报告 |
@@ -44,11 +44,11 @@
 ## 每个 Phase 的完整验收（与 12 个月版相同）
 
 ### Phase 1 验收（W1 末）
-- [ ] 用 AI 完成真实小功能开发闭环
-- [ ] 5 条真实 AI 辅助开发使用记录
-- [ ] 5 个 Prompt 模板 + workflow 文档
-- [ ] `ai_commit_review.py` 可运行
-- [ ] 能 3 分钟讲清 AI 在开发流程中的作用
+- [ ] 在 **DB Demo Studio** 上用 AI 完成真实开发闭环（至少 PoC #1：DemoPackage + Player）
+- [ ] 5 条真实 AI 辅助开发使用记录（优先 `02_DB_Demo_Studio/logs/`）
+- [ ] 5 个 Prompt 模板 + workflow 文档（`01_AI_Dev_Workflow_Kit/`）
+- [ ] 可选：`ai_commit_review.py` 可运行，用于提交前审查 Studio 变更
+- [ ] 能 3 分钟讲清 AI 在 **DB Demo Studio** 开发流程中的作用
 
 ### Phase 2 验收（W4 末）
 - [ ] 上传论文可问答，回答带来源片段
@@ -124,4 +124,4 @@ Phase 6 完整版在 12 个月里占 6-8 周，3 个月内完成 **v1 核心功�
 
 **Today = Day 1 = W1 = Phase 1 启动**
 
-见 [`day1_guide.md`](day1_guide.md)
+见 [`day1_2026-05-27_guide.md`](day1_2026-05-27_guide.md)

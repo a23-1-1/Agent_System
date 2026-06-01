@@ -1,5 +1,6 @@
-# AI 辅助开发使用记录 — ai_commit_review 接入 DeepSeek
+# AI 辅助开发使用记录 — ai_commit_review 接入 LLM
 
+> **这是模板文件。** 实战完成后，把每节「（待填写）」改成你的真实经历。
 > 路径：`01_AI_Dev_Workflow_Kit/logs/2026-05-27_ai_commit_review.md`
 
 ---
@@ -10,42 +11,40 @@
 
 ## 任务
 
-给 `scripts/ai_commit_review.py` 接入 DeepSeek API，读取 git diff 生成 Code Review 报告。
+给 `scripts/ai_commit_review.py` 接入 LLM API，读取 git diff 生成 Code Review 报告。
 
 ## 我自己原本会怎么做
 
-手动 `git diff`，逐文件看变更，凭经验找 bug 和风格问题，大约 20-30 分钟；大 diff 容易遗漏边界问题。
+（待填写：2-3 句。例：手动 `git diff`，逐文件看变更，凭经验找 bug 和风格问题，大约 20 分钟。）
+手动 `git diff`，逐文件看变更，凭经验找 bug 和风格问题，大约 20 分钟。保证代码能跑通，在后续出现bug时才可能修复
 
 ## AI 帮我做了什么
 
-1. 用 `prompts/requirements.md` 模板澄清需求，生成结构化功能清单和验收标准
-2. Cursor Agent 实现 DeepSeek API 接入、diff 截断、错误处理
-3. 补充 Docker 运行方式和 README 文档
-4. 跑脚本自动生成 P0-P3 分级审查报告
-
+（待填写：2-3 句。例：用 requirements 模板澄清需求；让 Cursor 写接入 Deepseek 的代码；跑脚本自动生成报告。）
+用 requirements 模板澄清需求；让 Cursor 写接入 Deepseek 的代码；跑脚本自动生成报告。
 ## 哪些地方有效
 
-- 需求模板帮想全了 `.env.example`、diff 截断、CLI 参数保留等边界
-- Code Review 报告按 P0-P3 分级，比人工初筛更快
-- 脚本可复用，后续每次 commit 前都能跑
+（待填写： bullet 列表。例：- 需求模板帮我想到了 .env.example 和 diff 截断）
+需求模板帮我想到了 .env.example 和 diff 截断
 
 ## 哪些地方无效
 
-- 初期不清楚在哪个文件写什么，需要模板引导
-- diff 超过 8000 字符会截断，审查范围不完整（报告中有说明）
+（待填写： bullet 列表。例：- AI 第一次漏了 base_url 配置）
+AI 第一次漏了 base_url 配置
+未创建.env文件
 
 ## 我如何修正 AI 输出
 
-- 明确 API 策略：统一 DeepSeek，写入 `learning_constraints.md`
-- 修正 `.env.example` 为占位符，真实 Key 只放本地 `.env`
+（待填写：1-2 句。例：补上了 OPENAI_BASE_URL，重新跑脚本验证。）
+补上了 OPENAI_BASE_URL，重新跑脚本验证。
+我自己创建.env
 
 ## 可复用经验
 
-- **先需求澄清再编码**，比直接让 AI 改文件少返工
-- **每条实战都写 logs/**，Phase 1 验收靠记录数量
-- **API Key 绝不进 git**
+（待填写：1-2 条。例：先写需求再写代码，比直接让 AI 改文件少返工。）
+先写需求再写代码，比直接让 AI 改文件少返工。还要让ai进行代码审查
 
 ## 关联文件
 
-- 需求澄清：`logs/2026-05-27_ai_commit_review_requirements.md`
-- 审查报告：`logs/review_20260601_012246.md`
+- 需求澄清输出：（如有）`logs/2026-05-27_ai_commit_review_requirements.md`
+- 审查报告输出：`logs/review_YYYYMMDD_HHMMSS.md`（脚本运行后自动生成）

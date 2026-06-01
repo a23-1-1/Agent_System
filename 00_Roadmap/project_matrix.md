@@ -1,13 +1,14 @@
 # Project Matrix
 
-> 最后更新：2026-05-27  
-> API 策略：仅 DeepSeek → [`learning_constraints.md`](learning_constraints.md)
+> 最后更新：2026-06-01  
+> API 策略：仅 DeepSeek → [`learning_constraints.md`](learning_constraints.md)  
 > 时间线：**3 个月**（2026-05-27 → 2026-08-27）  
-> 详细计划：[`3month_plan.md`](3month_plan.md)
+> 详细计划：[`3month_plan.md`](3month_plan.md) · 加速版：[`3month_full_plan.md`](3month_full_plan.md)
 
 | 项目 | Phase | 状态 | 当前任务 | 下一个里程碑 | 产出物 |
 |---|---|---|---|---|---|
-| AI Dev Workflow Kit | Phase 1 | Building | DeepSeek Code Review 已跑通 | 5 条使用记录 + workflow v1 | README + 模板 + 脚本 |
+| **DB Demo Studio** | Phase 1 实战代码库 | **Building** | PoC #1：DemoPackage 样例 + Player | `demo-schema` + 浏览器逐步播放 | 演示工具 monorepo |
+| AI Dev Workflow Kit | Phase 1 工具包 | Building | Prompt 模板 + workflow 定稿 | 5 条使用记录 + workflow v1 | 模板 + 可选审查脚本 |
 | Paper RAG Assistant | Phase 2 | Not Started | — | PDF 解析模块 | Demo |
 | Personal MCP Server | Phase 3 | Not Started | — | 实现第一个 tool | MCP Server |
 | Mini Agent Framework | Phase 4 | Not Started | — | Agent Loop | 框架代码 |
@@ -24,11 +25,18 @@
 - `Done` — 阶段完成
 - `Paused` — 暂停
 
+## Phase 1 双项目分工
+
+| 目录 | 角色 |
+|---|---|
+| `02_DB_Demo_Studio/` | **主代码库**：需求、架构、PoC、功能实现、测试、调试、重构 |
+| `01_AI_Dev_Workflow_Kit/` | **工作流工具包**：`prompts/`、`workflow.md`、`ai_commit_review.py`（可选提交前审查） |
+
 ## 3 个月主线
 
 | 月份 | 周 | 主线项目 | 关键产出 |
 |---|---|---|---|
-| **M1** | W1 | AI Dev Workflow Kit | 工作流 + 5 条使用记录 |
+| **M1** | W1 | **DB Demo Studio** PoC + AI 工作流沉淀 | DemoPackage 样例 + Player PoC + 5 条使用记录 |
 | M1 | W2 | Paper RAG v1 | PDF 解析 + 向量入库 |
 | M1 | W3 | Paper RAG v2 | 引用定位 + chunk 实验 |
 | M1 | W4 | Paper RAG 打磨 | Demo + 评估报告 + 文章 |

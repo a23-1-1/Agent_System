@@ -1,6 +1,6 @@
 # 学习约束与工具配置
 
-> 最后更新：2026-05-27  
+> 最后更新：2026-06-01  
 > 本文件记录个人学习过程中的固定约束，所有 Phase 项目均遵守。
 
 ---
@@ -36,7 +36,7 @@ DEEPSEEK_MODEL=deepseek-chat
 
 | Phase | 项目 | LLM 用途 |
 |---|---|---|
-| Phase 1 | AI Dev Workflow Kit | Code Review、Prompt 实战 |
+| Phase 1 | **DB Demo Studio**（主）+ AI Dev Workflow Kit（模板/审查） | 需求/架构/编码/测试；Code Review 可选脚本 |
 | Phase 2 | Paper RAG Assistant | Embedding 可选 DeepSeek；生成用 deepseek-chat |
 | Phase 3+ | MCP / Agent / Research | 统一 DeepSeek |
 
@@ -52,7 +52,38 @@ DEEPSEEK_MODEL=deepseek-chat
 
 ---
 
+## 每日文件命名规范
+
+每日新建的学习文件，文件名须带 **Day 序号 + 日期**，避免混淆：
+
+| 类型 | 命名格式 | 存放目录 | 示例 |
+|---|---|---|---|
+| 当日任务指南 | `day{N}_{YYYY-MM-DD}_guide.md` | `00_Roadmap/` | `day2_2026-05-28_guide.md` |
+| 当日流程复盘 | `day{N}_{YYYY-MM-DD}_workflow.md` | `00_Roadmap/` | `day1_2026-05-27_workflow.md` |
+| Daily Log | `{YYYY-MM-DD}.md` | `00_Learning_Logs/daily/` | `2026-05-28.md` |
+| 实战 logs（Phase 1 优先） | `{YYYY-MM-DD}_{任务简述}.md` | `02_DB_Demo_Studio/logs/` | `2026-06-01_poc_player_requirements.md` |
+| 实战 logs（Kit 侧车） | `{YYYY-MM-DD}_{任务简述}.md` | `01_AI_Dev_Workflow_Kit/logs/` | `2026-05-27_ai_commit_review.md` |
+
+**规则：**
+- `{N}` = Day 1、Day 2 …（与 weekly_plan 一致）
+- `{YYYY-MM-DD}` = 该 Day 对应日历日期
+- 指南（guide）= 当天要做的事；复盘（workflow）= 当天做完后的流程归档
+
+**W1 文件索引：**
+
+| Day | 日期 | 指南 | 复盘 |
+|---|---|---|---|
+| Day 1 | 2026-05-27 | `day1_2026-05-27_guide.md` | `day1_2026-05-27_workflow.md` |
+| Day 2 | 2026-05-28 | `day2_2026-05-28_guide.md` | （Day 2 结束后创建） |
+| Day 3 | 2026-05-29 | `day3_2026-05-29_guide.md` | … |
+| Day 4 | 2026-05-30 | `day4_2026-05-30_guide.md` | … |
+| Day 5 | 2026-05-31 | `day5_2026-05-31_guide.md` | … |
+| Day 6 | 2026-06-01 | `day6_2026-06-01_guide.md` | … |
+| Day 7 | 2026-06-02 | `day7_2026-06-02_guide.md` | … |
+
+
 ## 相关文件
 
 - 示例配置：`01_AI_Dev_Workflow_Kit/.env.example`
-- 审查脚本：`01_AI_Dev_Workflow_Kit/scripts/ai_commit_review.py`
+- Phase 1 实战代码库：`02_DB_Demo_Studio/`
+- 审查脚本（可选）：`01_AI_Dev_Workflow_Kit/scripts/ai_commit_review.py`

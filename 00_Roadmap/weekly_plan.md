@@ -1,20 +1,38 @@
 # Weekly Plan - 2026-W22
 
-> 周期：2026-05-26 ~ 2026-06-01  
+> 周期：2026-05-26 ~ 2026-06-01（W1 可延续至 2026-06-02 周复盘）  
 > 总目标：**3 个月完成 12 个月全部内容** → [`3month_full_plan.md`](3month_full_plan.md)  
-> 今日指南 → Day 1 [`day1_workflow.md`](day1_workflow.md) · Day 2 [`day2_guide.md`](day2_guide.md)  
-> API 约束 → [`learning_constraints.md`](learning_constraints.md)  
-> 阶段：M1 Week 1 — AI 辅助开发工作流  
-> 主题：Git 初始化 + Workflow Kit 完成
+> **Phase 1 实战代码库：** [`02_DB_Demo_Studio/`](../02_DB_Demo_Studio/)  
+> **工作流工具包：** [`01_AI_Dev_Workflow_Kit/`](../01_AI_Dev_Workflow_Kit/)  
+> 今日指南 → Day 1 [`day1_guide.md`](day1_guide.md) · 历史 [`day1_2026-05-27_workflow.md`](day1_2026-05-27_workflow.md) · Day 2 [`day2_2026-05-28_guide.md`](day2_2026-05-28_guide.md)  
+> API 约束 / 命名规范 → [`learning_constraints.md`](learning_constraints.md)  
+> 阶段：M1 Week 1 — AI 辅助开发工作流 + DB Demo Studio PoC
 
 ---
 
 ## 本周目标
 
-1. 搭建完整的学习记录体系（目录、模板、看板）。
-2. 明确个人 AI 辅助开发工作流。
-3. 收集并整理 5 个 AI 编程常用场景。
-4. 完成 AI Dev Workflow Kit 第一版骨架。
+1. 搭建完整的学习记录体系（目录、模板、看板）— ✅ 已启动
+2. 明确个人 AI 辅助开发工作流（模板在 Kit，实战在 Studio）
+3. 在 **DB Demo Studio** 上完成 PoC #1 路径（DemoPackage → Player）
+4. 收集 **5 条** AI 辅助开发使用记录（`02_DB_Demo_Studio/logs/` 或 `01_AI_Dev_Workflow_Kit/logs/`）
+5. 完成 AI Dev Workflow Kit 第一版骨架（prompt + workflow 文档）
+
+---
+
+## Week 1 任务分解（DB Demo Studio）
+
+| 天 | AI 工作流环节 | DB Demo Studio 交付 | 使用记录 |
+|---|---|---|---|
+| D1 | 需求澄清 | 读 requirements + PoC #1 结构化需求 / 样例 JSON | `logs/*_poc_player*` |
+| D2 | 架构设计 | 细化 `demo-schema` / 模块边界（@ architecture.md） | `logs/*_architecture*` |
+| D3 | 编码 + 测试 | 最小 Player 或 JSON Schema 校验脚本 | `logs/*_player_poc*` |
+| D4 | Debug | 修复步进、空步骤、JSON 校验失败 | `logs/*_debug*` |
+| D5 | Code Review | 可选 `ai_commit_review.py --unstaged` 审查 Studio diff | `logs/review_*` |
+| D6 | 整合文档 | `workflow.md` v1 + 双项目 README 对齐 | — |
+| D7 | 周复盘 | `2026-W22.md` + `project_matrix.md` 更新 | Phase 1 自评 |
+
+**PoC #1 验收（architecture 实施步骤 #1）：** 手写 `DemoPackage` JSON → 浏览器 Player 用 ←/→/空格 控制 ≥3 步。
 
 ---
 
@@ -22,13 +40,11 @@
 
 | 优先级 | 任务 | 状态 | 产出 |
 |:---:|---|---|---|
-| P0 | 初始化 Git 并完成首次 commit | Done | 已 push 到 GitHub |
-| P0 | 创建学习管理目录与模板 | Done | `00_*` 目录结构 |
-| P0 | 写第一篇 Daily Log | Done | `2026-05-27.md` |
-| P1 | 整理 5 个 AI 编程场景 | Done | `01_AI_Dev_Workflow_Kit/docs/scenarios.md` |
-| P1 | 写第一版 AI 开发工作流 | In Progress | `01_AI_Dev_Workflow_Kit/docs/workflow.md` |
-| P2 | 完成 3 个 Prompt 模板 | In Progress | `prompts/*.md`（requirements 已实战） |
-| P0 | ai_commit_review DeepSeek 接入 | Done | 提前于 Day 5 完成 |
+| P0 | DB Demo Studio PoC #1（DemoPackage + Player） | In Progress | `02_DB_Demo_Studio/` 可见代码/样例 |
+| P0 | 5 条 AI 辅助开发使用记录 | In Progress | `02_DB_Demo_Studio/logs/` 为主 |
+| P1 | 5 个 Prompt 模板实战验证 | In Progress | Kit `prompts/*.md` |
+| P1 | `workflow.md` 定稿 | In Progress | 双项目路径写清 |
+| P2 | 可选：`ai_commit_review.py` 审查 Studio 变更 | Done（脚本） / 待复用 | Kit `logs/review_*` |
 
 ---
 
@@ -37,62 +53,62 @@
 ### Day 1（2026-05-27）— 系统搭建 + 首次 AI 实战 ✅
 
 - [x] 创建 `00_Roadmap`、`00_Learning_Logs`、`00_Notes`、`00_Portfolio`
-- [x] 创建 `project_matrix.md`、本周计划、今日日志
-- [x] 阅读路线图 Phase 1 部分，写下 3 条个人学习目标
-- [x] 列出 5 个你日常开发中最想用 AI 加速的场景
-- [x] ai_commit_review 接入 DeepSeek API（提前完成）
-- [x] 第 1 条 AI 辅助开发使用记录
+- [x] 学习管理体系 + 首次 DeepSeek 实战（`ai_commit_review`，侧车工具）
+- [x] 第 1 条 AI 辅助开发使用记录（Kit）
 
-### Day 2（2026-05-28）— 场景与模板
+> **2026-06-01 起：** Phase 1 主代码库切换为 `02_DB_Demo_Studio`。新 Day 1 任务见 [`day1_guide.md`](day1_guide.md)。
 
-> 详细流程：[`day2_guide.md`](day2_guide.md)
+### Day 2 — 场景 + 架构 Prompt（DB Demo Studio）
 
-- [ ] 完善 `scenarios.md`：每个场景写「人工做法 vs AI 做法」
-- [ ] 完成 `prompts/requirements.md` 和 `prompts/architecture.md`
-- [ ] 用 Cursor 实际完成一个小任务，记录过程
+> 详细流程：[`day2_2026-05-28_guide.md`](day2_2026-05-28_guide.md)（已对齐 Studio 主线）
 
-### Day 3（2026-05-29）— 编码闭环
+- [ ] 整理 `scenarios.md`（案例指向 DB Demo Studio）
+- [ ] 用 `prompts/architecture.md` 细化 `demo-schema` / PoC 模块划分
+- [ ] 第 2 条使用记录 → `02_DB_Demo_Studio/logs/`
 
-- [ ] 完成 `prompts/code_review.md`
-- [ ] 选一个小功能，走一遍：需求 → 设计 → 编码 → 测试
-- [ ] 写一条 AI 辅助开发过程记录
+### Day 3 — 编码闭环
 
-### Day 4（2026-05-30）— Debug 与重构
+- [ ] 完成 `prompts/code_review.md` 实战（审查 PoC 代码）
+- [ ] 实现：样例 JSON 校验 **或** 最小 Player 骨架
+- [ ] 第 3 条使用记录
 
-- [ ] 完成 `prompts/debug.md` 和 `prompts/refactor.md`
-- [ ] 找一个真实 Bug 或构造失败测试，用 AI 辅助定位
-- [ ] 记录 Debug 过程
+### Day 4 — Debug
 
-### Day 5（2026-05-31）— 工具脚本
+- [ ] `prompts/debug.md` 实战（Player/Schema 真实问题）
+- [ ] 第 4 条使用记录
 
-- [x] 实现 `scripts/ai_commit_review.py` DeepSeek 版（Day 1 提前完成）
-- [x] 测试：读取 git diff → 生成审查报告
+### Day 5 — Code Review 工具（可选）
 
-### Day 6（2026-06-01）— 整合
+- [ ] `python scripts/ai_commit_review.py --unstaged`（在仓库根或 Kit 目录，审查 `02_DB_Demo_Studio/` 变更）
+- [ ] 第 5 条使用记录（可与 D3/D4 合并计数）
 
-- [ ] 完善 `docs/workflow.md`
-- [ ] 更新 README
-- [ ] 写概念笔记：Agent / MCP / Skill 各 1 条（预习）
+### Day 6 — 整合
 
-### Day 7（2026-06-02）— 周复盘
+- [ ] 完善 `docs/workflow.md`（Studio 为主路径）
+- [ ] 更新 `02_DB_Demo_Studio/README.md` + 根 `README.md`
+- [ ] 概念笔记：Agent / MCP / Skill
 
-- [ ] 写 `2026-W22.md` 周复盘
-- [ ] 更新 `project_matrix.md` 状态
-- [ ] 确定下周 Phase 1 收尾任务
+### Day 7 — 周复盘
+
+- [ ] 写 `2026-W22.md`（或当前周）周复盘
+- [ ] 更新 `project_matrix.md`
+- [ ] Phase 1 七项验收自检（见 `3month_full_plan.md`）
 
 ---
 
 ## 本周阅读
 
-- [ ] Cursor 官方文档：Rules、Skills、MCP 概览
-- [ ] Anthropic MCP 介绍页（预习 Phase 3）
-- [ ] 路线图 §1.2 关键词定位（Agent / MCP / Skill / OpenHands / HNSW）
+- [ ] `02_DB_Demo_Studio/docs/architecture.md` — PoC 顺序与 Phase 1 步骤
+- [ ] `02_DB_Demo_Studio/docs/curriculum-mapping.md` — 课纲与模板优先级
+- [ ] Cursor 官方文档：Rules、MCP 概览
+- [ ] 路线图 §1.2 关键词（Agent / MCP / Skill）
 
 ---
 
 ## 验收标准（Week 1 结束）
 
 - 学习管理系统可正常使用，至少 5 篇 Daily Log
-- AI Dev Workflow Kit 有 README + 5 个 prompt 模板 + workflow 文档
-- 至少 3 条真实 AI 辅助开发使用记录
-- 能口头讲清楚：AI 在你开发流程中的 3 个具体作用点
+- **DB Demo Studio：** PoC #1 可演示（JSON + Player 步进）或等价可验收产物
+- AI Dev Workflow Kit：5 个 prompt 模板 + workflow 文档
+- **至少 5 条**真实 AI 辅助开发使用记录（Studio logs 优先）
+- 能口头讲清楚：AI 在 **DB Demo Studio 开发** 中的 3 个作用点

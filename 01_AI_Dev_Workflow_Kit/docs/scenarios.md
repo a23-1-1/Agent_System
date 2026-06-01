@@ -1,6 +1,7 @@
 # AI 辅助开发场景分析
 
-> 记录 5 个日常开发场景：人工做法 vs AI 辅助做法 vs 效果评估。
+> 记录 5 个日常开发场景：人工做法 vs AI 辅助做法 vs 效果评估。  
+> **Phase 1 主实战项目：** [`02_DB_Demo_Studio/`](../../02_DB_Demo_Studio/) — 本文件案例优先写 Studio 开发任务。
 
 ---
 
@@ -15,10 +16,6 @@
 | 风险 | 遗漏边界条件 | AI 可能过度假设，需人工校验 |
 
 **我的 Prompt 模板**：`prompts/requirements.md`
-
-**我的真实案例**：（例：接到「给登录页加验证码」需求，只有一句话描述）
-**预期 AI 帮助**：（例：生成用户故事、边界条件、验收标准清单）
-**人工校验点**：（例：安全策略、和现有账号体系是否冲突 — 必须自己确认）
 
 **使用记录**：
 <!-- 实战后追加，格式：- 2026-05-27：做了 xxx → 见 logs/xxx.md -->
@@ -38,7 +35,6 @@
 | 风险 | 个人偏见 | AI 可能忽略现有约束 |
 
 **我的 Prompt 模板**：`prompts/architecture.md`
-把 5 个场景改成**你自己的真实场景**，每个场景补充：
 
 ```markdown
 **我的真实案例**：开发智慧课堂助手
@@ -61,13 +57,13 @@
 
 **我的 Prompt 模板**：`prompts/code_review.md`
 
-**我的真实案例**：改完 ai_commit_review.py 后，提交前自查 diff
-**预期 AI 帮助**：自动读 diff，按 P0-P3 分级列出问题和修改建议
-**人工校验点**：AI 误报的风格问题、是否真的影响逻辑 — 提交前自己过一遍
+**我的真实案例**：提交 `02_DB_Demo_Studio/` PoC 代码前审查 diff
+**预期 AI 帮助**：自动读 diff，按 P0-P3 分级；关注 schema/Player 逻辑与安全（无密钥）
+**人工校验点**：AI 误报、教学简化标注、JSON Schema 破坏性变更
 
 **使用记录**：
-- 2026-05-27：ai_commit_review 需求澄清 → `logs/2026-05-27_ai_commit_review_requirements.md`
-- 2026-05-27：Code Review 实战 → `logs/review_20260601_012246.md`
+- 2026-05-27：Kit 侧车 — ai_commit_review 需求澄清 → `logs/2026-05-27_ai_commit_review_requirements.md`
+- 2026-05-27：Kit 侧车 — Code Review → `logs/review_20260601_012246.md`
 
 ---
 

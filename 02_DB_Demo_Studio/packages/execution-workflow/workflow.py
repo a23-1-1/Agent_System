@@ -226,7 +226,13 @@ class ExecutionWorkflowEngine:
         # Step 4: plan — 执行计划（依赖 EXPLAIN）
         plan_info = {"mysql_cost": None, "pg_cost": None}
         if self.mysql_explain:
-            plan_info["mysql_cost"] = self.mysql_explain.get("query_block", {}).get("cost", None) if isinstance(self.mysql_explain, dict) else None
+            cost_info = self.mysql_explain.get("query_block", {}).get("cost_info", {}) if isinstance(self.mysql_explain, dict) else {}
+            raw_cost = cost_info.get("query_cost")
+            if raw_cost is not None:
+                try:
+                    plan_info["mysql_cost"] = float(raw_cost)
+                except (ValueError, TypeError):
+                    plan_info["mysql_cost"] = raw_cost
         if self.pg_explain:
             pg_plan = self.pg_explain.get("Plan", {}) if isinstance(self.pg_explain, dict) else {}
             plan_info["pg_cost"] = pg_plan.get("Total Cost", None) if pg_plan else None
@@ -246,7 +252,19 @@ class ExecutionWorkflowEngine:
         row_estimate = None
         if self.mysql_explain and isinstance(self.mysql_explain, dict):
             qb = self.mysql_explain.get("query_block", {})
-            row_estimate = qb.get("table", {}).get("rows_examined_per_join", None) if isinstance(qb, dict) else None
+            if isinstance(qb, dict):
+                # Try direct table path first
+                table_info = qb.get("table", {})
+                if isinstance(table_info, dict):
+                    row_estimate = table_info.get("rows_examined_per_scan") or table_info.get("rows_examined_per_join")
+                # Fallback: nested_loop tables
+                if row_estimate is None and qb.get("nested_loop"):
+                    for nl in qb["nested_loop"]:
+                        t = nl.get("table", {}) if isinstance(nl, dict) else {}
+                        if isinstance(t, dict):
+                            r = t.get("rows_examined_per_scan") or t.get("rows_examined_per_join")
+                            if r is not None:
+                                row_estimate = (row_estimate or 0) + int(r)
         phases.append(WorkflowPhase(
             id="phase_execute", order=5, phase="execute",
             label_zh=f"执行过程 — 扫描数据并应用条件",
@@ -295,6 +313,7 @@ class ExecutionWorkflowEngine:
                 },
                 "visuals": {"type": "highlight-sql"},
                 "groundingRef": None,
+                "engineEvidence": phase.engine_evidence if phase.engine_evidence else None,
             }
             # 如果是 plan/execute 步骤且有 explain_node_id，加上 grounding
             for mapping in self._ir.step_mapping:

@@ -25,10 +25,12 @@ import os
 from typing import Optional, Callable
 
 # ── 路径 hack：让 ai-tools 引用同仓库模块 ──
-_PKG_DIR = os.path.dirname(os.path.abspath(__file__))          # .../packages/ai-tools/
-_STUDIO_DIR = os.path.dirname(os.path.dirname(_PKG_DIR))      # .../02_DB_Demo_Studio/
-sys.path.insert(0, os.path.join(_STUDIO_DIR, "packages", "db-engine"))
-sys.path.insert(0, os.path.join(_STUDIO_DIR, "packages", "execution-workflow"))
+# Docker 中通过 PYTHONPATH 环境变量注入，本地开发通过 sys.path fallback
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
+_STUDIO_DIR = os.path.dirname(os.path.dirname(_PKG_DIR))
+if "packages" not in sys.path[0] if sys.path else False:
+    sys.path.insert(0, os.path.join(_STUDIO_DIR, "packages", "db-engine"))
+    sys.path.insert(0, os.path.join(_STUDIO_DIR, "packages", "execution-workflow"))
 
 from connector import explain_both, get_mysql, get_pg, JOIN_SQL
 from workflow import ExecutionWorkflowEngine
@@ -121,20 +123,16 @@ def validate_demo_package(dp: dict) -> dict:
 
 
 def generate_narration(step_context: dict, style: str = "大学本科数据库课程", api_key: Optional[str] = None) -> dict:
-    """调用 DeepSeek LLM 生成单步讲解词（zh + en）
+    """生成单步讲解词（zh + en）— 有 DEEPSEEK_API_KEY 时调 LLM，否则用规则模板
 
-    step_context: {"phase": "plan", "sql": "...", "explain_summary": "...", "tables": [...]}
+    step_context: {"phase": "plan", "sql": "...", "explain_summary": "...", "tables": [...], "engine_evidence": {...}}
     """
+    api_key = api_key or os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        api_key = os.getenv("DEEPSEEK_API_KEY")
-    if not api_key:
-        return {"zh": f"[需要 DEEPSEEK_API_KEY] 步骤: {step_context.get('phase', '')}", "en": f"[Need DEEPSEEK_API_KEY] step: {step_context.get('phase', '')}", "source": "ai"}
+        return _rule_narration(step_context)
 
     from openai import OpenAI
-    client = OpenAI(
-        base_url="https://api.deepseek.com",
-        api_key=api_key,
-    )
+    client = OpenAI(base_url="https://api.deepseek.com", api_key=api_key)
 
     phase = step_context.get("phase", "")
     sql = step_context.get("sql", "")
@@ -168,7 +166,154 @@ EXPLAIN 摘要: {explain if explain else '(无)'}
         result["tokens_used"] = resp.usage.total_tokens if resp.usage else 0
         return result
     except Exception as e:
-        return {"zh": f"[AI 生成失败: {e}] 步骤: {phase}", "en": f"[AI failed: {e}] step: {phase}", "source": "ai"}
+        return _rule_narration(step_context)
+
+
+def _rule_narration(ctx: dict) -> dict:
+    """无 API key 时，基于 engineEvidence 生成有意义的规则化讲解词"""
+    phase = ctx.get("phase", "")
+    sql = ctx.get("sql", "")
+    ev = ctx.get("engine_evidence", {}) or {}
+    sql_type = "查询" if sql.strip().upper().startswith("SELECT") else "操作"
+
+    templates = {
+        "lex": lambda: _lex_narration(sql, ev),
+        "parse": lambda: _parse_narration(sql, ev),
+        "optimize": lambda: _optimize_narration(ev),
+        "plan": lambda: _plan_narration(ev),
+        "execute": lambda: _execute_narration(ev),
+        "result": lambda: _result_narration(sql, sql_type),
+    }
+    fn = templates.get(phase)
+    if fn:
+        return {**fn(), "source": "rule"}
+    return {
+        "zh": f"正在执行 {sql_type} 的「{phase}」阶段。",
+        "en": f"Executing the {phase} phase of the {sql_type}.",
+        "source": "rule",
+    }
+
+
+def _lex_narration(sql: str, ev: dict) -> dict:
+    tokens = ev.get("tokens", [])
+    count = ev.get("token_count", len(tokens))
+    token_str = "、".join(tokens[:8]) if tokens else "关键字"
+    return {
+        "zh": f"SQL 解析器首先对语句进行词法分析，将输入的文本拆分为有意义的单词（Token）。"
+              f"本条 SQL 共识别出 {count} 个关键字，包括 {token_str} 等。"
+              f"词法分析是数据库执行 SQL 的第一步，它负责识别 SELECT、FROM、WHERE 等保留字，"
+              f"以及表名、列名等标识符，为后续的语法分析奠定基础。",
+        "en": f"The SQL parser first performs lexical analysis, splitting the input text into meaningful tokens. "
+              f"This query contains {count} keywords, including {token_str}. "
+              f"Lexical analysis is the first step of SQL execution — it identifies reserved words "
+              f"like SELECT, FROM, WHERE, as well as identifiers such as table and column names.",
+    }
+
+
+def _parse_narration(sql: str, ev: dict) -> dict:
+    tables = ev.get("tables", [])
+    features = []
+    if ev.get("has_join"): features.append("JOIN 连接")
+    if ev.get("has_where"): features.append("WHERE 条件过滤")
+    if ev.get("has_group_by"): features.append("GROUP BY 分组")
+    if ev.get("has_order_by"): features.append("ORDER BY 排序")
+    feature_str = "，".join(features) if features else "基本查询"
+
+    table_str = "、".join(tables) if tables else "相关表"
+    return {
+        "zh": f"语法分析阶段检查 SQL 语句是否符合数据库的语法规则，并构建抽象语法树（AST）。"
+              f"本条 SQL 涉及表「{table_str}」，包含 {feature_str}。"
+              f"语法分析器会验证表名和列名是否存在、数据类型是否匹配、"
+              f"以及 JOIN 条件中的关联字段是否类型兼容等语义约束。",
+        "en": f"The parsing phase checks whether the SQL conforms to the database grammar rules "
+              f"and builds an Abstract Syntax Tree (AST). "
+              f"This query involves table(s) «{table_str}», with {feature_str}. "
+              f"The parser validates table/column existence, data type compatibility, "
+              f"and JOIN condition field type consistency.",
+    }
+
+
+SCAN_LABELS = {
+    "full_table_scan": "全表扫描",
+    "index_lookup": "索引查找",
+    "index_only_scan": "索引覆盖扫描",
+    "nested_loop_join": "嵌套循环连接",
+    "hash_join": "哈希连接",
+}
+
+
+def _optimize_narration(ev: dict) -> dict:
+    scan = ev.get("scan_type", "unknown")
+    scan_zh = SCAN_LABELS.get(scan, scan.replace("_", " "))
+    table_count = ev.get("table_count", "?")
+
+    explanations = {
+        "full_table_scan": "这意味着数据库将逐行扫描整张表。对于小表来说这是高效的，但大表上应尽量避免。",
+        "index_lookup": "数据库将通过索引树快速定位数据行，而非逐行扫描。这通常能显著减少 I/O 次数。",
+        "index_only_scan": "所有需要的数据都在索引中，无需回表访问数据行，这是最高效的访问方式之一。",
+        "nested_loop_join": "对于驱动表的每一行，数据库会到被驱动表中查找匹配行。当驱动表较小且被驱动表有索引时效率很高。",
+        "hash_join": "数据库为较小的表构建内存哈希表，然后扫描大表进行匹配。适用于两表均较大且无合适索引的场景。",
+    }
+    explain = explanations.get(scan, "优化器根据统计信息选择了合适的执行策略。")
+
+    return {
+        "zh": f"查询优化器根据表统计信息和系统配置，评估多种可能的执行计划并选择代价最小的方案。"
+              f"当前选择的扫描方式为「{scan_zh}」，涉及 {table_count} 张表。{explain}",
+        "en": f"The query optimizer evaluates multiple execution strategies based on table statistics "
+              f"and system configuration, selecting the plan with the lowest estimated cost. "
+              f"The chosen scan method is «{scan_zh}», involving {table_count} table(s).",
+    }
+
+
+def _plan_narration(ev: dict) -> dict:
+    mysql_cost = ev.get("mysql_cost")
+    pg_cost = ev.get("pg_cost")
+    cost_detail = ""
+    if mysql_cost is not None:
+        cost_detail += f"MySQL 估计代价为 {mysql_cost}。"
+    if pg_cost is not None:
+        cost_detail += f" PostgreSQL 估计代价为 {pg_cost}。"
+
+    if not cost_detail:
+        cost_detail = "代价估算需要数据库连接提供 EXPLAIN 数据。"
+
+    return {
+        "zh": f"执行计划是数据库优化器产出的最终操作指令序列，描述了如何访问表、使用哪些索引、"
+              f"按什么顺序执行 JOIN 等具体步骤。{cost_detail}"
+              f"执行计划中的代价单位是数据库内部的抽象度量，综合考虑了 I/O、CPU 和内存开销。",
+        "en": f"The execution plan is the optimizer's final set of operation instructions — "
+              f"describing how to access tables, which indexes to use, "
+              f"and in what order to perform JOIN operations. {cost_detail} "
+              f"The cost unit is an abstract metric combining I/O, CPU, and memory overhead.",
+    }
+
+
+def _execute_narration(ev: dict) -> dict:
+    rows = ev.get("rows_estimate")
+    row_detail = f"优化器估计需要扫描约 {rows:,} 行数据。" if rows is not None else ""
+
+    return {
+        "zh": f"执行器按照执行计划逐步执行各操作节点。{row_detail}"
+              f"执行过程会涉及缓冲池读取、索引遍历、数据行过滤、临时表创建等实际数据库操作。"
+              f"实际扫描行数可能与估计值有出入，这取决于统计信息的准确性和运行时条件。",
+        "en": f"The executor walks through each operation node per the execution plan. {row_detail}"
+              f"The execution involves buffer pool reads, index traversal, row filtering, "
+              f"and temporary table creation. Actual rows scanned may differ from estimates "
+              f"depending on statistics accuracy and runtime conditions.",
+    }
+
+
+def _result_narration(sql: str, sql_type: str) -> dict:
+    return {
+        "zh": f"执行完成，返回 {sql_type} 的结果集。"
+              f"结果集由数据库以行（row）和列（column）的形式返回给客户端。"
+              f"对于 SELECT 查询，结果集包含查询命中的所有数据行；"
+              f"对于 INSERT / UPDATE / DELETE，则返回影响的行数。",
+        "en": f"Execution complete, returning the {sql_type} result set. "
+              f"The result set is returned to the client as rows and columns. "
+              f"For SELECT queries, it contains the matching data rows; "
+              f"for INSERT / UPDATE / DELETE, it returns the number of affected rows.",
+    }
 
 
 def generate_visual_spec(step_context: dict, api_key: Optional[str] = None) -> dict:

@@ -32,3 +32,5 @@ models/
 *.log
 tmp/
 temp/
+%TEMP%*/
+explain_test.json

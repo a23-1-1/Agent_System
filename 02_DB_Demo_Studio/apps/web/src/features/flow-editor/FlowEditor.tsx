@@ -1,11 +1,12 @@
-import type { DemoPackage, DemoStep } from '../../pages/TeachPage'
+// features/flow-editor/FlowEditor.tsx
+// 从 demoStore 读取当前演示，展示步骤卡片
 
-interface Props {
-  demo: DemoPackage | null
-}
+import { useDemoStore } from '../../stores/demoStore'
 
-export function FlowEditor({ demo }: Props) {
-  if (!demo) {
+export function FlowEditor() {
+  const currentDemo = useDemoStore(s => s.currentDemo)
+
+  if (!currentDemo) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-300 text-sm">
         <div className="text-center">
@@ -16,14 +17,16 @@ export function FlowEditor({ demo }: Props) {
     )
   }
 
+  const steps = currentDemo.steps || []
+
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="relative min-h-[400px]">
         <div className="flex items-start gap-4 flex-wrap">
-          {demo.steps.map((step, i) => (
+          {steps.map((step, i) => (
             <div key={step.id} className="relative">
               <StepCard step={step} index={i} />
-              {i < demo.steps.length - 1 && (
+              {i < steps.length - 1 && (
                 <div className="absolute top-1/2 -right-4 w-4 h-px bg-blue-300" />
               )}
             </div>
@@ -31,16 +34,16 @@ export function FlowEditor({ demo }: Props) {
         </div>
 
         <div className="mt-8 pt-4 border-t border-dashed border-gray-200 flex items-center gap-4 text-xs text-gray-400">
-          <span>共 {demo.steps.length} 步</span>
-          <span>版本: v{demo.metadata.teacherVersion}</span>
-          <span>步进时长: {demo.playback.defaultStepDurationMs}ms</span>
+          <span>共 {steps.length} 步</span>
+          <span>版本: v{currentDemo.metadata?.teacherVersion || 1}</span>
+          <span>步进时长: {currentDemo.playback?.defaultStepDurationMs || 5000}ms</span>
         </div>
       </div>
     </div>
   )
 }
 
-function StepCard({ step, index }: { step: DemoStep; index: number }) {
+function StepCard({ step, index }: { step: any; index: number }) {
   const labels: Record<string, string> = {
     lex: '词法分析', parse: '语法分析', optimize: '查询优化',
     plan: '执行计划', execute: '执行过程', result: '结果集',

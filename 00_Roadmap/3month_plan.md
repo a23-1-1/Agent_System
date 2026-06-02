@@ -33,20 +33,24 @@
 
 2 周内完成架构 Phase 1 全部 8 步，Player 可端到端演示。
 
-### ✅ 已完成（W1 D1-D3）
+### ✅ 已完成（W1 D1-D4）
 
 | Step | 交付物 | 状态 |
 |:---:|---|---|
-| **1** | `schema.json` / `join-query.json` / `validate.py` / `player.html` | ✅ |
+| **1** | `schema.json` / `join-query.json` / `validate.py` / `player.html` + React Player 组件 | ✅ |
+| **2** | `db-engine`（Docker MySQL 8 + PG 16）+ `execution-workflow`（SQL 6 步 DAG） | ✅ |
+| **3** | `ai-tools`（8 个 LLM 工具，DeepSeek Function Calling 兼容） | ✅ |
+| **4 上半** | `apps/web/`（React+TS+Vite+Tailwind 三页面）+ `apps/api/`（Flask SSE） | ✅ |
 
-### W1 D4-D7
+**技术栈已升级：** React 18 + TS + Vite + TailwindCSS (前端) · Python Flask (后端) · DeepSeek (LLM)
+
+### W1 D5-D7
 
 | 天 | Step | 任务 | 交付物 |
 |---|---|---|---|
-| D4 | **2 上半** | db-engine：Docker MySQL 8 + PG 16 + 连接脚本 | `packages/db-engine/` |
-| D5 | **2 下半** | execution-workflow：SQL 解析 + 步骤 DAG + 状态机 | `packages/execution-workflow/` |
-| D6 | **3** | ai-tools：explain_mysql / explain_pg / validate_demo_package | `packages/ai-tools/` |
-| D7 | **4 上半** | ai-orchestrator：Agent Loop + Tool Registry | `packages/ai-orchestrator/` |
+| D5 | **4 下半** | ai-orchestrator: ReAct Agent Loop + Tool Registry + SSE | `packages/ai-orchestrator/` |
+| D6 | **5** | regenerate-step 单步重写 | 只改一步 narration |
+| D7 | **6** | renderer: moviepy 脚手架 + MP4 导出 | `apps/renderer/` |
 
 ### W2 D1-D5
 
@@ -91,7 +95,7 @@
 
 | 天 | 任务 |
 |---|---|
-| D1 | 技术选型：Python + FastAPI + Chroma + DeepSeek + ADR 笔记 |
+| D1 | 技术选型：Python + Flask + Chroma + DeepSeek + ADR 笔记 |
 | D2 | PDF 解析模块（PyMuPDF）：提取标题/摘要/章节/正文 |
 | D3 | Chunk 策略 + Embedding 入库 |
 | D4 | 基础问答 API（检索 + LLM 回答） |

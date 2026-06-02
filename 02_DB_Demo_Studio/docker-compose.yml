@@ -1,0 +1,95 @@
+# 02_DB_Demo_Studio/docker-compose.yml
+# 全栈一键启动：后端 API + 前端 Nginx + MySQL + PostgreSQL + Redis
+
+services:
+  # ── 数据库：MySQL 8 EXPLAIN 引擎 ──
+  mysql:
+    image: mysql:8.0
+    container_name: db_demo_mysql
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_demo
+      MYSQL_USER: demo
+      MYSQL_PASSWORD: demo_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./packages/db-engine/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 数据库：PostgreSQL 16 EXPLAIN 引擎 ──
+  postgres:
+    image: postgres:16
+    container_name: db_demo_pg
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo_pass
+      POSTGRES_DB: db_demo
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./packages/db-engine/pg/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "demo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 缓存：Redis ──
+  redis:
+    image: redis:7-alpine
+    container_name: db_demo_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ── 后端：FastAPI ──
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: db_demo_api
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-}
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # ── 前端：React SPA（Nginx 托管）──
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: db_demo_web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  mysql_data:
+  pg_data:

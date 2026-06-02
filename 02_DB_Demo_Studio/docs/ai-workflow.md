@@ -2,9 +2,9 @@
 
 | 字段 | 值 |
 |---|---|
-| **日期** | 2026-06-01 |
+| **日期** | 2026-06-02 |
 | **父文档** | [`architecture.md`](./architecture.md) |
-| **状态** | 详设初稿 |
+| **状态** | v2 — 已对齐 Flask + Python 全栈 |
 
 ---
 
@@ -205,4 +205,4 @@ interface WorkflowPhase {
 
 | 日期 | 变更 |
 |---|---|
-| 2026-06-01 | 初稿：AI Studio、Agent、Execution Workflow、Tools |
+| 2026-06-02 | v2：技术栈更新 —— Flask + React + Tailwind + Python 全栈 |

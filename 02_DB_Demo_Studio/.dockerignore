@@ -1,0 +1,42 @@
+# .dockerignore — 构建上下文排除
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+apps/web/node_modules
+apps/web/dist
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env.local
+.env.production
+
+# Project docs (build context 不需要)
+docs/
+00_*
+00_Roadmap/
+00_Notes/
+AI_*

@@ -907,9 +907,32 @@ Agent_System/
 
 ---
 
-## 9. 第一阶段启动计划（已归档）
+## 9. 当前路线说明（2026-06-02 更新）
 
-> 以下 Week 1-4 为原始模板，实际执行请参照 [`00_Roadmap/3month_plan.md`](00_Roadmap/3month_plan.md) 的 W1-W12 加速路线。
+> **实际执行请参照** [`00_Roadmap/3month_plan.md`](00_Roadmap/3month_plan.md) — 12 周完成 6 个项目（每个 2 周）。
+
+当前阶段：**W1 Day 4 — DB Demo Studio Phase 1 Step 1-4 进行中。**
+
+### 已完成（W1 D1-D4）
+
+| Step | 交付 | 状态 |
+|:---:|---|---|
+| Step 1 | demo-schema + Player（React 组件） | ✅ |
+| Step 2 | db-engine（Docker MySQL/PG）+ execution-workflow（SQL 6 步 DAG） | ✅ |
+| Step 3 | ai-tools（8 个 LLM 工具，DeepSeek Function Calling 兼容） | ✅ |
+| Step 4 上半 | ai-orchestrator Agent Loop | 🔜 |
+
+### 技术栈
+
+| 层 | 技术 |
+|---|---|
+| 前端 | React 18 + TypeScript + Vite + Tailwind CSS + React Flow |
+| 后端 | Python Flask + SSE + DeepSeek API |
+| 基础设施 | Docker（MySQL 8 + PostgreSQL 16）+ pymysql + psycopg2 |
+
+---
+
+## 9.1 第一阶段启动计划（原始模板，已归档）
 
 ## Week 1：建立 AI 学习管理系统
 

@@ -42,9 +42,9 @@
 
 - **技术栈：**
   - **AI 层：** **DeepSeek API**（OpenAI-compatible SDK；本仓库统一 Provider，见 [`learning_constraints.md`](../../00_Roadmap/learning_constraints.md)）+ **Agent 编排**（Tool Calling）+ **SSE 流式输出** + Prompt Registry
-  - **执行 grounding：** Docker 沙箱 MySQL 8 + PostgreSQL 16（`EXPLAIN`）+ `node-sql-parser`
-  - **应用层：** TypeScript monorepo — React 18 + Vite（**AI Studio** 对话 UI）；Fastify API；BullMQ + Redis
-  - **渲染层：** Remotion + ffmpeg（MP4 + 字幕）；`viz-primitives` 与 Player 共用
+  - **执行 grounding：** Docker 沙箱 MySQL 8 + PostgreSQL 16（`EXPLAIN`）+ Python `sqlparse` / `workflow.py` SQL 解析引擎
+  - **应用层：** React 18 + TypeScript + Vite + Tailwind CSS（前端）+ **Flask API**（后端 SSE 对话、工具调度）；`packages/ai-tools/` 工具层
+  - **渲染层：** Python `moviepy`（MP4 + 字幕）
   - **数据层：** PostgreSQL 16 + MinIO/S3 + 向量库（课纲/教材 RAG，Phase 1 可选简化）
 
 - **相关模块：**
@@ -176,10 +176,7 @@ stateDiagram-v2
 │   │       ├── step-editor/        步骤精修（表单 + 「Ask AI」）
 │   │       └── export-panel/       发布网页 / 导出 MP4
 │   ├── api/
-│   │   └── src/
-│   │       ├── routes/ai/          POST /ai/chat, /ai/regenerate-step (SSE)
-│   │       ├── routes/workflows/   POST /workflows/execution/run
-│   │       └── workers/            ai-generation, explain, render
+│   │   └── main.py                 ★ Flask SSE 后端
 │   └── renderer/
 ├── packages/
 │   ├── ai-orchestrator/            ★ Agent 编排、会话、Tool Calling
@@ -187,12 +184,10 @@ stateDiagram-v2
 │   ├── execution-workflow/         ★ 执行演示状态机 + 步骤 DAG
 │   ├── llm-pipeline/               提示词、结构化 JSON、降级
 │   ├── prompt-registry/            Prompt 版本管理
-│   ├── demo-schema/                DemoPackage Schema
-│   ├── db-engine/                  MySQL/PG 沙箱
-│   ├── sql-analyzer/
-│   ├── viz-primitives/
-│   ├── subtitle-kit/
-│   ├── lms-bridge/
+│   ├── demo-schema/                单一真相源 ✅
+│   ├── db-engine/                  MySQL/PG 沙箱 ✅
+│   ├── execution-workflow/         SQL 执行工作流引擎 ✅
+│   ├── ai-tools/                   LLM 工具 ✅
 │   └── curriculum/
 └── infra/
 ```
@@ -465,5 +460,6 @@ POST /demos/:id/polish  // 可选：整包 AI 润色讲解词
 
 | 日期 | 变更 |
 |---|---|
+| 2026-06-02 | **v3 技术栈更新**：Flask 替代 Fastify，Python 全栈；moviepy 替代 Remotion；去掉未实现的 viz-primitives/sql-analyzer/BullMQ |
 | 2026-06-01 | v1：方案 A/B 初稿 |
 | 2026-06-01 | **v2：AI 优先** — Agent、执行工作流、AI Studio、ai-orchestrator/ai-tools 模块 |

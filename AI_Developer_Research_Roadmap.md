@@ -638,64 +638,55 @@ mini-agent/
 
 ---
 
-## 9. 最小可行执行版本
+## 9. 最小可行执行版本（3 个月版：6 项目 × 2 周）
 
-如果你时间有限，先做这 4 个项目：
+当前执行计划已更新为 **6 个项目各 2 周**（共 12 周），详见 `00_Roadmap/3month_plan.md`：
 
-1. **Paper RAG Assistant**
-   - 证明你会 LLM 应用和科研增强。
+| # | 项目 | 周 |
+|---|---|---|
+| 1 | **DB Demo Studio** — AI 原生数据库教学演示平台 | W1-W2 |
+| 2 | **Paper RAG Assistant** — 论文 RAG 问答系统 | W3-W4 |
+| 3 | **Personal MCP Server** — 个人 MCP 工具服务 | W5-W6 |
+| 4 | **Mini Agent Framework** — 自研 Agent 框架 | W7-W8 |
+| 5 | **Coding Agent Demo** — 软件工程 Agent | W9-W10 |
+| 6 | **Portfolio + 扩展** — 作品集 + Skill/Multi-Agent/Research Copilot | W11-W12 |
 
-2. **Personal MCP Server**
-   - 证明你理解 Agent 工具协议和工程扩展。
-
-3. **Mini Agent Framework**
-   - 证明你理解 Agent 底层机制。
-
-4. **Coding Agent Demo**
-   - 证明你能把 Agent 用到软件工程求职场景。
-
-这 4 个项目完成后，你已经可以形成很强的求职叙事：
-
-> 我能用 AI 提升自己的开发效率，也能自己构建 Agent 系统，并把它应用到代码仓库理解、科研阅读和工具自动化中。
+**技术栈：** React 18 + TypeScript + Vite + Tailwind CSS + React Flow（前端）；Python Flask + DeepSeek + Docker（后端）
 
 ---
 
-## 10. 当前仓库建议结构
-
-你当前的目录已经适合作为 Agent 学习主仓库，可以继续扩展：
+## 10. 当前仓库实际结构（2026-06-02 更新）
 
 ```text
 Agent_System/
-  00_Roadmap/
-    AI_Developer_Research_Roadmap.md
-    weekly_plan.md
-    reading_list.md
-  01_LangGraph_Basics/
-  02_Tool_Use_Agent/
-  03_Agent_Memory_System/
-  04_Multi_Agent_Team/
-  05_Self_Improving_Agent/
-  06_RAG_Research_Assistant/
-  07_MCP_Server/
-  08_Mini_Agent_Framework/
-  09_Coding_Agent/
-  10_AI_Research_Copilot/
-```
-
-建议下一步先创建：
-
-```text
-00_Roadmap/
-06_RAG_Research_Assistant/
-07_MCP_Server/
-08_Mini_Agent_Framework/
-09_Coding_Agent/
-10_AI_Research_Copilot/
+  00_Roadmap/          计划、看板、Git 工作流
+  00_Learning_Logs/    每日/每周/每月日志
+  00_Notes/            概念笔记、论文笔记、实验记录
+  00_Portfolio/        简历、面试故事、Demo 索引
+  01_AI_Dev_Workflow_Kit/    AI 工作流工具包（prompts, workflow, 审查脚本）
+  02_DB_Demo_Studio/         数据库课演示工具（W1-W2 主项目）
+    ├── apps/web/            React 18 + TS + Vite + Tailwind（AI Studio 对话 UI）
+    ├── apps/api/            Flask 后端（SSE 对话, 工具调度）
+    ├── packages/demo-schema/  DemoPackage JSON Schema + 校验
+    ├── packages/db-engine/   Docker MySQL 8 + PG 16 沙箱
+    ├── packages/ai-tools/    8 个 LLM 可调工具（含 DeepSeek Function Calling）
+    ├── packages/execution-workflow/  SQL 解析 → 6 步 DAG 引擎
+    ├── packages/ai-orchestrator/    Agent Loop（占位，W1 D6-D7）
+    └── docs/                架构设计 + AI 工作流 + 课纲映射
+  06_RAG_Research_Assistant/   (W3 创建)
+  07_MCP_Server/              (W5 创建)
+  08_Mini_Agent_Framework/    (W7 创建)
+  09_Coding_Agent/            (W9 创建)
 ```
 
 ---
 
-## 11. 第一周行动清单
+## 11. 第一周行动清单（2026-05-27 已完成，以下为历史记录）
+
+> ✅ **W1 D1-D4 已完成**：学习管理系统 + DB Demo Studio PoC #1（schema/样例/Player/db-engine/ai-tools）。
+> 当前进度见 `02_DB_Demo_Studio/README.md` 及 `00_Learning_Logs/daily/2026-06-02.md`。
+
+### 历史记录（原始 Day 1-7 计划）
 
 ### Day 1
 
@@ -709,7 +700,7 @@ Agent_System/
 - 选定第一个项目：`Paper RAG Assistant`。
 - 确定技术栈：
   - Python
-  - FastAPI
+  - Flask
   - Streamlit 或 Next.js
   - Qdrant 或 Chroma
   - OpenAI / Claude / 本地模型

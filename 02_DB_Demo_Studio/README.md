@@ -5,8 +5,8 @@
 
 | 字段 | 值 |
 |---|---|
-| **项目代号** | `db_demo_video` / DB Demo Studio |
-| **状态** | Phase 1 — PoC #1 编码中（demo-schema 定义 + 样例 JSON） |
+| **技术栈** | React 19 + TS + Vite + Tailwind CSS（前端）· FastAPI + WebSocket + Redis + Docker（后端） |
+| **状态** | Phase 1 — v5 全栈基线（教师工作台 + WS 对话 + 工具链） |
 | **代码根目录** | 本目录 `02_DB_Demo_Studio/` |
 
 ---
@@ -49,41 +49,37 @@
 
 ---
 
-## 建议目录结构（Phase 1 落地时）
+## 建议目录结构（当前实际状态）
 
 ```
 02_DB_Demo_Studio/
 ├── apps/
-│   ├── web/
-│   │   └── src/features/
-│   │       ├── ai-studio/          ★ AI 对话式生成
-│   │       ├── execution-player/   ★ 分步执行演示
-│   │       └── step-editor/
-│   ├── api/                        AI SSE + workflow routes
-│   └── renderer/
+│   ├── web/                        ✅ React 18 + TS + Vite + Tailwind（3 页面）
+│   ├── api/                        ✅ FastAPI 后端（REST + WebSocket + SSE 兼容）
+│   └── renderer/                   🔜 moviepy MP4 导出
 ├── packages/
-│   ├── ai-orchestrator/            ★ Agent 编排
-│   ├── ai-tools/                   ★ LLM 工具（EXPLAIN 等）
-│   ├── execution-workflow/         ★ 执行演示工作流引擎
-│   ├── llm-pipeline/
-│   ├── prompt-registry/
-│   ├── demo-schema/
+│   ├── demo-schema/                ✅ Schema + 校验 + 6 步 JOIN 样例
+│   ├── db-engine/                  ✅ Docker MySQL 8 + PG 16 沙箱
+│   ├── execution-workflow/         ✅ SQL 解析 → 6 步 DAG 引擎
+│   ├── ai-tools/                   ✅ 8 个 LLM 工具（DeepSeek 兼容）
+│   ├── ai-orchestrator/            🔜 ReAct Agent Loop（W1 D5）
 │   └── ...
 ├── infra/
-└── docs/
+└── docs/                           ✅ 架构 + AI 工作流 + 课纲映射
 ```
 
-当前 Phase 0 仅包含 `docs/` 与占位目录；PoC 通过后初始化 monorepo 工具链（pnpm + Turborepo）。
+### W1-W2 PoC 进度（实际）
 
-### W1 学习 PoC（本周验收，先于下方 8–10 周纵向切片）
-
-| PoC | 交付 | 验收 |
+| PoC | 交付 | 状态 |
 |---|---|---|
-| **#1** | 手写 `DemoPackage` JSON + 最小 Execution Player | 浏览器 ←/→/空格 控制 ≥3 步 |
-| **#2** | `explain_mysql` + `explain_postgres` → 工作流 IR | ≥3 步且含 `groundingRef` |
-| **#3** | 最小 AI Studio SSE | 单轮对话生成一步讲解词 |
+| **#1** | DemoPackage Schema + validate.py + 6 步 JOIN 样例 | ✅ |
+| **#2** | ExecutionPlayer（React 组件 + 纯 HTML） | ✅ |
+| **#3** | db-engine Docker 沙箱（MySQL 8 + PG 16） | ✅ |
+| **#4** | execution-workflow SQL 解析引擎（6 步 DAG） | ✅ |
+| **#5** | ai-tools 8 个 LLM 可调工具（含 DeepSeek SDK） | ✅ |
+| **#6** | React 前端 + FastAPI 后端 + 教师工作台三栏 UI | ✅ |
 
-> 下方 Gantt 为 **Phase 1 产品化纵向切片（约 8–10 周）**，与 W1 日计划并行但不等同。
+> 下方 Gantt 为 **Phase 1 产品化纵向切片（约 2 周）**，当前 Step 1-3 已完成，Step 4 进行中。
 
 ---
 
@@ -107,13 +103,13 @@ gantt
 
 ### Phase 1 交付清单
 
-- [ ] **Execution Workflow** — SQL 分步 DAG + EXPLAIN grounding
-- [ ] **AI Studio** — 对话流式生成演示初稿（≤60s）
-- [ ] **单步 AI 重写** — regenerate-step，不整包重来
-- [ ] **DemoPackage** 驱动 Player 与 MP4（步骤一致）
-- [ ] LLM 讲解 + 教师编辑；MySQL EXPLAIN；PG 部分对照
-- [ ] 非 SQL 工作流 ×3（ER、范式、事务）
-- [ ] 交互网页 + 中英字幕 MP4；LMS 试嵌入
+- [x] **Execution Workflow** — SQL 分步 DAG + EXPLAIN grounding ✅
+- [x] **AI Studio** — 对话流式生成演示初稿（React + FastAPI WebSocket） ✅
+- [ ] **单步 AI 重写** — regenerate-step，不整包重来 🔜
+- [x] **DemoPackage** 驱动 Player（步骤一致） ✅
+- [x] LLM 讲解 + 教师编辑；MySQL EXPLAIN；PG 部分对照 ✅
+- [ ] 非 SQL 工作流 ×3（ER、范式、事务） 🔜
+- [ ] 交互网页 + 中英字幕 MP4；LMS 试嵌入 🔜
 
 ### Phase 2 方向（概要）
 
@@ -134,5 +130,6 @@ gantt
 
 | 日期 | 变更 |
 |---|---|
+| 2026-06-02 | **v5 全栈**：React + FastAPI + WebSocket + Docker Compose + 教师工作台 |
 | 2026-06-01 | 初始化学习项目目录、架构 canonical、课纲映射初稿 |
 | 2026-06-01 | **v2 AI 优先**：architecture 重构、新增 ai-workflow.md |

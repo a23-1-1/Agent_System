@@ -43,7 +43,7 @@
 
 ### D7 — Step 4 下半 + Step 5：AI Studio 后端 + 前端
 
-- [ ] `apps/api/` — FastAPI 后端：POST /ai/chat (SSE), POST /ai/regenerate-step
+- [ ] `apps/api/` — FastAPI：POST /api/ai/chat (SSE), WS /ws/chat, POST /api/ai/regenerate-step
 - [ ] `apps/ai-studio.html` — AI Studio 对话 UI（纯 HTML + SSE EventSource）
 - [ ] regenerate-step 接口与单步重写验证
 - [ ] 第 使用记录

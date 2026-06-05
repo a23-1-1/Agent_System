@@ -17,7 +17,11 @@ export function ConversationPanel({ activeConvId, onSwitchConv, onCreateConv }: 
   const [search, setSearch] = useState('')
 
   const filtered = search
-    ? conversations.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+    ? conversations.filter(c =>
+        c.title.toLowerCase().includes(search.toLowerCase()) ||
+        c.summary?.toLowerCase().includes(search.toLowerCase()) ||
+        c.curriculumNode?.toLowerCase().includes(search.toLowerCase())
+      )
     : conversations
 
   return (

@@ -14,6 +14,7 @@ export interface ConversationSummary {
   lastActivity: string // ISO datetime
   summary?: string
   tags?: string[]
+  curriculumNode?: string
 }
 
 export interface Conversation extends ConversationSummary {
@@ -40,6 +41,7 @@ export interface Message {
 export interface MessageContent {
   text?: string
   sql?: string
+  knowledge?: string
   imageUrl?: string
   toolCalls?: ToolCall[]
   demoSnapshotId?: string
@@ -73,7 +75,7 @@ export interface DemoPackage {
   steps: DemoStep[]
   workflowTrace?: {
     workflowId: string
-    workflowType: 'sql-execution' | 'concept-progression'
+    workflowType: 'course-demonstration' | 'concept-progression'
     aiSessionId?: string
     grounding?: { mysql?: string; postgres?: string }
   }
@@ -134,6 +136,7 @@ export interface SimulationData {
       description: string
       intermediateRows: number
       columns?: string[]
+      rows?: Array<Record<string, string | number>>
     }>
   }
   indexAnimation?: {
@@ -211,39 +214,39 @@ export interface TeacherProfile {
 
 // 客户端 → 服务端
 export type WsClientEvent =
-  | { type: 'chat:message'; convId: string; content: { text?: string; sql?: string } }
-  | { type: 'chat:interrupt'; convId: string }
-  | { type: 'conv:create'; title?: string }
-  | { type: 'conv:switch'; convId: string }
-  | { type: 'conv:delete'; convId: string }
-  | { type: 'conv:rename'; convId: string; title: string }
-  | { type: 'step:regenerate'; convId: string; stepId: string; hint?: string }
+  | { type: 'conversation:message'; convId: string; content: { text?: string; sql?: string; knowledge?: string } }
+  | { type: 'conversation:interrupt'; convId: string }
+  | { type: 'conversation:create'; title?: string }
+  | { type: 'conversation:switch'; convId: string }
+  | { type: 'conversation:delete'; convId: string }
+  | { type: 'conversation:rename'; convId: string; title: string }
+  | { type: 'demo:regenerate_step'; convId: string; stepId: string; hint?: string }
   | { type: 'quiz:answer'; convId: string; stepIndex: number; answer: number }
   | { type: 'player:seek'; convId: string; stepIndex: number }
   | { type: 'demo:export'; convId: string; format: string }
   | { type: 'message:delete'; convId: string; msgId: string }
-  | { type: 'conv:clear_messages'; convId: string }
+  | { type: 'conversation:clear_messages'; convId: string }
 
 // 服务端 → 客户端
 export type WsServerEvent =
-  | { type: 'conv:list'; conversations: ConversationSummary[] }
-  | { type: 'conv:loaded'; convId: string; messages: Message[]; currentDemo?: DemoPackage }
-  | { type: 'conv:created'; conversation: ConversationSummary }
-  | { type: 'conv:deleted'; convId: string }
-  | { type: 'agent:thinking'; convId: string; content: string }
-  | { type: 'agent:tool_call'; convId: string; tool: string; status: 'start' | 'complete'; result?: unknown }
-  | { type: 'step:preview'; convId: string; step: DemoStep; order: number }
-  | { type: 'step:regenerated'; convId: string; step: DemoStep }
+  | { type: 'conversation:list'; conversations: ConversationSummary[] }
+  | { type: 'conversation:loaded'; convId: string; messages: Message[]; currentDemo?: DemoPackage }
+  | { type: 'conversation:created'; conversation: ConversationSummary }
+  | { type: 'conversation:deleted'; convId: string }
+  | { type: 'assistant:trace'; convId: string; content: string }
+  | { type: 'assistant:tool_call'; convId: string; tool: string; status: 'start' | 'complete'; result?: unknown }
+  | { type: 'demo:step_preview'; convId: string; step: DemoStep; order: number }
+  | { type: 'demo:step_regenerated'; convId: string; step: DemoStep }
   | { type: 'demo:updated'; convId: string; demo: DemoPackage }
   | { type: 'demo:complete'; convId: string; demo?: DemoPackage | null; demo_id: string }
   | { type: 'demo:exported'; convId: string; url: string; format: string }
   | { type: 'quiz:result'; convId: string; correct: boolean; explanation: string }
-  | { type: 'adaptive:suggest'; convId: string; action: string; rationale: string; targetStepIndex?: number }
-  | { type: 'conv:new_message'; convId: string; message: Message }
+  | { type: 'learning:suggest'; convId: string; action: string; rationale: string; targetStepIndex?: number }
+  | { type: 'conversation:new_message'; convId: string; message: Message }
   | { type: 'player:sync'; convId: string; stepIndex: number }
   | { type: 'error'; convId?: string; message: string }
-  | { type: 'assistant-text'; convId: string; content: string }
-  | { type: 'conv:cleared'; convId: string }
+  | { type: 'assistant:text'; convId: string; content: string }
+  | { type: 'conversation:cleared'; convId: string }
   | { type: 'message:deleted'; convId: string; msgId: string }
 
 // ═══════════════════════════════════════════════
@@ -253,4 +256,5 @@ export type WsServerEvent =
 export interface ChatContent {
   text?: string
   sql?: string
+  knowledge?: string
 }

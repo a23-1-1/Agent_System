@@ -30,7 +30,7 @@ export default function ClassroomPage() {
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h1 className="text-xl font-semibold">{currentDemo?.title?.zh || '课堂演示'}</h1>
+          <h1 className="text-xl font-semibold">{currentDemo?.title?.zh || '课程演示'}</h1>
           <p className="text-sm text-gray-500">{currentDemo?.title?.en}</p>
         </div>
         <div className="p-6">

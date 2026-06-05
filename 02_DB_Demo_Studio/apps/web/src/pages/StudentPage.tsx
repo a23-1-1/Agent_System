@@ -31,7 +31,7 @@ export default function StudentPage() {
         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold">{currentDemo.title.zh}</h1>
-            <p className="text-xs text-gray-400">只读模式 · {currentDemo.steps.length} 步</p>
+            <p className="text-xs text-gray-400">课程自学模式 · {currentDemo.steps.length} 步</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400">掌握度</span>

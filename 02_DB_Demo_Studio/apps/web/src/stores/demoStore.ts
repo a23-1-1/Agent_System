@@ -98,7 +98,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
           set({ generationStatus: 'idle' })
         }
         break
-      case 'step:preview':
+      case 'demo:step_preview':
         // Step preview: we add or update the step in current demo
         set(s => {
           if (!s.currentDemo) return s
@@ -112,7 +112,7 @@ export const useDemoStore = create<DemoState>((set, get) => ({
           return { currentDemo: { ...s.currentDemo, steps } }
         })
         break
-      case 'step:regenerated':
+      case 'demo:step_regenerated':
         set(s => {
           if (!s.currentDemo) return s
           return {

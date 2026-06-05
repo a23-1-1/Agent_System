@@ -12,17 +12,17 @@ interface Props {
 
 const SAMPLE_QUESTIONS: Record<string, QuizQuestion[]> = {
   lex: [
-    { id: 'lex_1', question: 'SQL 解析的第一阶段是什么？', options: ['词法分析', '语法分析', '查询优化', '执行计划'], answer: 0, explanation: '词法分析（Lex）将 SQL 语句分解为关键字、表名等基本单元（tokens），是解析的第一步。' },
+    { id: 'lex_1', question: '数据库语句解析的第一阶段是什么？', options: ['词法分析', '语法分析', '查询优化', '执行计划'], answer: 0, explanation: '词法分析（Lex）将语句分解为关键字、表名等基本单元（tokens），是解析的第一步。' },
     { id: 'lex_2', question: '以下哪个不是 SQL 关键字？', options: ['SELECT', 'FROM', 'TABLE', 'students'], answer: 3, explanation: 'students 是表名，不是 SQL 关键字。SELECT、FROM 都是 SQL 关键字。' },
   ],
   parse: [
-    { id: 'parse_1', question: '语法分析阶段的主要任务是什么？', options: ['生成执行计划', '检查表是否存在', '拆分为 tokens', '执行查询'], answer: 1, explanation: '语法分析（Parse）验证 SQL 语句的语法正确性，并检查引用的表和列是否存在。' },
+    { id: 'parse_1', question: '语法分析阶段的主要任务是什么？', options: ['生成执行计划', '检查表是否存在', '拆分为 tokens', '执行查询'], answer: 1, explanation: '语法分析（Parse）验证语句的语法正确性，并检查引用的表和列是否存在。' },
   ],
   optimize: [
     { id: 'opt_1', question: '以下哪种扫描方式在大表无索引时效率最高？', options: ['全表扫描', '索引查找', '哈希连接', '嵌套循环连接'], answer: 1, explanation: '索引查找避免全表扫描，通过 B+树快速定位到少量数据行。全表扫描适合小表。' },
   ],
   plan: [
-    { id: 'plan_1', question: 'MySQL 使用 JOIN 时常用哪种算法？', options: ['Hash Join', 'Nested Loop Join', 'Merge Join', '全表扫描'], answer: 1, explanation: 'MySQL 在 JOIN 操作中常用 Nested Loop Join（嵌套循环连接），对每一行遍历匹配表。' },
+    { id: 'plan_1', question: '数据库演示中使用 JOIN 时常用哪种算法？', options: ['Hash Join', 'Nested Loop Join', 'Merge Join', '全表扫描'], answer: 1, explanation: '在常见教学场景中，JOIN 演示常用 Nested Loop Join（嵌套循环连接）来解释逐行匹配的过程。' },
   ],
   result: [
     { id: 'result_1', question: 'INNER JOIN 的结果中，不匹配的行会被怎样处理？', options: ['保留为 NULL', '丢弃', '排在最后', '报错'], answer: 1, explanation: 'INNER JOIN 只保留两表中匹配的行，不匹配的行会被丢弃。' },
@@ -69,7 +69,7 @@ export function QuizPanel({ stepIndex, question }: Props) {
 
   return (
     <div className="border border-gray-200 rounded-xl p-3 bg-white">
-      <div className="text-xs font-medium text-gray-500 mb-2">📝 知识点测验</div>
+      <div className="text-xs font-medium text-gray-500 mb-2">📝 课程知识测验</div>
       <p className="text-sm text-gray-700 mb-3">{effectiveQuestion.question}</p>
       <div className="space-y-2">
         {effectiveQuestion.options.map((opt, i) => (

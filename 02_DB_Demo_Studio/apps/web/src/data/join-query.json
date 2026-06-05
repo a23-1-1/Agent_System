@@ -96,7 +96,7 @@
   ],
   "workflowTrace": {
     "workflowId": "manual-demo",
-    "workflowType": "sql-execution",
+    "workflowType": "course-demonstration",
     "aiSessionId": "manual",
     "grounding": {
       "mysql":    null,
@@ -125,6 +125,54 @@
     "subtitles": {
       "zh": null,
       "en": null
+    }
+  },
+  "simulationData": {
+    "sqlSimulator": {
+      "steps": [
+        {
+          "clause": "FROM students s",
+          "description": "读取驱动表 students，获得基础行集",
+          "intermediateRows": 3,
+          "columns": ["id", "name", "major"],
+          "rows": [
+            { "id": 1, "name": "Alice", "major": "CS" },
+            { "id": 2, "name": "Bob", "major": "Math" },
+            { "id": 3, "name": "Carol", "major": "CS" }
+          ]
+        },
+        {
+          "clause": "INNER JOIN courses c",
+          "description": "引入 courses 表，准备按连接键匹配",
+          "intermediateRows": 3,
+          "columns": ["course_id", "course_name", "student_id"],
+          "rows": [
+            { "course_id": 101, "course_name": "Database Systems", "student_id": 1 },
+            { "course_id": 102, "course_name": "Algorithms", "student_id": 1 },
+            { "course_id": 103, "course_name": "Linear Algebra", "student_id": 2 }
+          ]
+        },
+        {
+          "clause": "ON s.id = c.student_id",
+          "description": "按 ON 条件过滤，只保留匹配的行",
+          "intermediateRows": 2,
+          "columns": ["name", "course_name", "student_id"],
+          "rows": [
+            { "name": "Alice", "course_name": "Database Systems", "student_id": 1 },
+            { "name": "Alice", "course_name": "Algorithms", "student_id": 1 }
+          ]
+        },
+        {
+          "clause": "SELECT s.name, c.course_name",
+          "description": "投影最终输出列，形成结果集",
+          "intermediateRows": 2,
+          "columns": ["name", "course_name"],
+          "rows": [
+            { "name": "Alice", "course_name": "Database Systems" },
+            { "name": "Alice", "course_name": "Algorithms" }
+          ]
+        }
+      ]
     }
   }
 }

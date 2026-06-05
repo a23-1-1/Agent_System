@@ -44,8 +44,8 @@ export class WsClient {
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
     const url =
       `${protocol}//${location.host}/ws/chat` +
-      `?teacher_id=${encodeURIComponent(this.teacherId)}` +
-      `&conv_id=${encodeURIComponent(this.convId)}`
+      `?teacherId=${encodeURIComponent(this.teacherId)}` +
+      `&convId=${encodeURIComponent(this.convId)}`
     this.ws = new WebSocket(url)
 
     this.ws.onopen = () => {

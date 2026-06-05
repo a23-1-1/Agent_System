@@ -53,7 +53,8 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
     const q = searchQuery.toLowerCase()
     return messages.filter(m =>
       m.content.text?.toLowerCase().includes(q) ||
-      m.content.sql?.toLowerCase().includes(q)
+      m.content.sql?.toLowerCase().includes(q) ||
+      m.content.knowledge?.toLowerCase().includes(q)
     )
   }, [messages, searchQuery])
 
@@ -75,22 +76,22 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
       convId: activeConvId,
       role: 'user',
       type: 'text',
-      content: { text, sql },
+      content: { text, sql, knowledge: text },
       createdAt: new Date().toISOString(),
     })
 
     wsClient.send({
-      type: 'chat:message',
+      type: 'conversation:message',
       convId: activeConvId,
-      content: { text, sql },
+      content: { text, sql, knowledge: text },
     })
   }
 
   const handleQuickAction = (action: string) => {
-    const prompts: Record<string, string> = {
-      viz: '为当前演示添加 Mermaid 可视化',
+      const prompts: Record<string, string> = {
+      viz: '为当前知识点添加 Mermaid 可视化',
       quiz: '给当前知识点出两道选择题',
-      engine: '对比 MySQL 和 PostgreSQL 的执行计划',
+      engine: '对比两种演示策略的证据与代价',
       tts: '为讲解词生成 TTS 配音',
       export: '导出当前演示',
       model: '切换到 Claude 模型重新生成',
@@ -104,7 +105,7 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
   const handleDelete = (msgId: string) => {
     if (activeConvId && wsClient) {
       wsClient.send({
-        type: 'message:delete' as any,
+        type: 'message:delete',
         convId: activeConvId,
         msgId,
       })
@@ -112,12 +113,15 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
     deleteMessage(activeConvId || '', msgId)
   }
 
-  // Listen for agent:thinking events
+  // Listen for assistant trace events
   useEffect(() => {
     if (!wsClient) return
     const unsub = wsClient.onEvent((evt) => {
-      if (evt.type === 'agent:thinking') {
+      if (evt.type === 'assistant:trace') {
         setThinking(evt.content)
+      }
+      if (evt.type === 'assistant:text') {
+        setThinking('')
       }
       if (evt.type === 'error') {
         setErrorMessage(evt.message || '生成失败，请重试')
@@ -179,20 +183,20 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
             <p className="text-sm">当前没有可用对话，先创建一个再开始。</p>
             <button
               onClick={async () => {
-                const id = await createConversation('新对话')
+                const id = await createConversation('新课程对话')
                 if (id) await switchConversation(id)
               }}
               className="text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transition-colors"
             >
-              新建对话
+              新建课程对话
             </button>
           </div>
         )}
 
         {messages.length === 0 && !searchQuery && (
           <div className="text-center text-gray-300 mt-8">
-            <div className="text-3xl mb-2">SQL</div>
-            <p className="text-xs text-gray-300">输入知识点或粘贴 SQL</p>
+            <div className="text-3xl mb-2">课程</div>
+            <p className="text-xs text-gray-300">输入知识点、案例或 SQL</p>
             <p className="text-xs text-gray-200">AI 将流式生成分步演示</p>
           </div>
         )}
@@ -233,7 +237,7 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
         {generationStatus === 'streaming' && (
           <div className="flex justify-start">
             <div className="bg-gray-100 rounded-xl rounded-bl-md px-3 py-2 text-gray-400 text-xs">
-              <span className="animate-pulse">已发送，AI 正在生成演示...</span>
+              <span className="animate-pulse">已发送，AI 正在生成课程演示...</span>
             </div>
           </div>
         )}
@@ -267,7 +271,7 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-            placeholder="输入知识点或 SQL..."
+            placeholder="输入知识点、案例或 SQL..."
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
           />
           <button
@@ -279,7 +283,7 @@ export function ChatPanel({ wsClient, activeConvId }: Props) {
           </button>
         </div>
         <div className="flex gap-2 mt-2">
-          {['SELECT', 'JOIN', 'ER 建模', '范式', '事务', '索引'].map(tag => (
+          {['JOIN', 'ER 建模', '范式', '事务', '索引', '恢复'].map(tag => (
             <button
               key={tag}
               onClick={() => setInput(prev => prev ? `${prev}, ${tag}` : tag)}

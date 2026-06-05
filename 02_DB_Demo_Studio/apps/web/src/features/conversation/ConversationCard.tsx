@@ -42,6 +42,9 @@ export function ConversationCard({ conv, isActive, onClick, onRename, onDelete }
         <div className="flex items-center gap-3 text-[10px] text-gray-400 truncate">
           <span>{dateStr}</span>
           <span>{conv.messageCount} 条</span>
+          {conv.curriculumNode && (
+            <span className="text-gray-300 truncate max-w-[90px]">{conv.curriculumNode}</span>
+          )}
           {conv.summary && (
             <span className="text-gray-300 truncate max-w-[120px]">{conv.summary}</span>
           )}

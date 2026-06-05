@@ -6,6 +6,8 @@ import { useDemoStore } from '../../stores/demoStore'
 import { useConversationStore } from '../../stores/conversationStore'
 import { usePlaybackStore } from '../../stores/playbackStore'
 import { MermaidRenderer } from '../animation/MermaidRenderer'
+import { SqlSimulator, type SqlSimulatorStep } from '../animation/SqlSimulator'
+import type { SimulationData } from '../../lib/types'
 import { QuizPanel } from '../quiz/QuizPanel'
 
 export function ExecutionPlayer() {
@@ -56,8 +58,8 @@ export function ExecutionPlayer() {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-300 text-sm text-center px-4">
         {messageCount > 0
-          ? '当前对话暂未生成可播放演示，请发送 SQL 或稍后重试。'
-          : '尚未生成演示。先在左侧输入 SQL 或数据库概念。'}
+          ? '当前对话暂未生成可播放演示，请发送知识点、案例或 SQL。'
+          : '尚未生成演示。先在左侧输入知识点、案例或 SQL。'}
       </div>
     )
   }
@@ -82,7 +84,12 @@ export function ExecutionPlayer() {
 
       {/* Phase panel */}
       <div className="flex-1 overflow-y-auto px-2 space-y-3">
-        <PhaseEvidence step={step} />
+        <PhaseEvidence
+          step={step}
+          stepIndex={currentStepIndex}
+          totalSteps={steps.length}
+          simulationData={currentDemo.simulationData}
+        />
       </div>
 
       {/* Controls */}
@@ -125,7 +132,29 @@ export function ExecutionPlayer() {
 
 /* ─── Phase Evidence Panel ─── */
 
-function PhaseEvidence({ step }: { step: any }) {
+function mapToSimulatorIndex(workflowIndex: number, workflowTotal: number, simTotal: number): number {
+  if (simTotal <= 1 || workflowTotal <= 1) return 0
+  return Math.min(
+    simTotal - 1,
+    Math.round((workflowIndex / (workflowTotal - 1)) * (simTotal - 1)),
+  )
+}
+
+function PhaseEvidence({
+  step,
+  stepIndex,
+  totalSteps,
+  simulationData,
+}: {
+  step: any
+  stepIndex: number
+  totalSteps: number
+  simulationData?: SimulationData
+}) {
+  const simSteps = (simulationData?.sqlSimulator?.steps ?? []) as SqlSimulatorStep[]
+  const simIndex =
+    simSteps.length > 0 ? mapToSimulatorIndex(stepIndex, totalSteps, simSteps.length) : 0
+
   const labels: Record<string, string> = {
     lex: '词法分析', parse: '语法分析', optimize: '查询优化',
     plan: '执行计划', execute: '执行过程', result: '结果集',
@@ -135,7 +164,7 @@ function PhaseEvidence({ step }: { step: any }) {
   return (
     <>
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
           {step.workflowPhase}
         </span>
         <span className="text-xs text-gray-500 font-medium">
@@ -143,7 +172,7 @@ function PhaseEvidence({ step }: { step: any }) {
         </span>
         {step.groundingRef && (
           <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
-            EXPLAIN grounded
+            有证据
           </span>
         )}
       </div>
@@ -151,6 +180,12 @@ function PhaseEvidence({ step }: { step: any }) {
       <p className="text-sm leading-relaxed text-gray-700 bg-gray-50 rounded-xl px-3 py-2">
         {step.narration?.zh || step.narration?.en || '等待 AI 生成讲解词...'}
       </p>
+
+      {simSteps.length > 0 && (
+        <div className="mb-3">
+          <SqlSimulator steps={simSteps} activeIndex={simIndex} />
+        </div>
+      )}
 
       {/* Mermaid visualization for each phase */}
       <div className="mb-3">
@@ -185,14 +220,14 @@ function renderEvidence(step: any) {
 function LexPanel({ ev }: { ev: Record<string, unknown> }) {
   const tokens = (ev.tokens as string[]) || []
   return (
-    <Panel title="SQL 关键字">
+    <Panel title="词法分析">
       <div className="flex flex-wrap gap-1.5">
         {tokens.map((t, i) => (
           <span key={i} className="bg-blue-100 text-blue-700 text-xs font-mono px-2 py-0.5 rounded">{t}</span>
         ))}
       </div>
       <div className="text-[11px] text-gray-400 mt-1.5">
-        共识别 {(ev.token_count as number) ?? '?'} 个关键字
+        共识别 {(ev.token_count as number) ?? '?'} 个词元
       </div>
     </Panel>
   )

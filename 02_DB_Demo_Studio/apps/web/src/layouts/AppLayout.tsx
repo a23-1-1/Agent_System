@@ -1,9 +1,9 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 
 const NAV = [
-  { path: '/', label: '备课', desc: 'AI Studio' },
-  { path: '/classroom', label: '课堂', desc: '演示播放' },
-  { path: '/student/demo', label: '学生端', desc: '预览' },
+  { path: '/', label: '课程备课', desc: 'AI Studio' },
+  { path: '/classroom', label: '课堂投射', desc: '演示播放' },
+  { path: '/student/demo', label: '学生自学', desc: '预览' },
 ]
 
 export default function AppLayout() {

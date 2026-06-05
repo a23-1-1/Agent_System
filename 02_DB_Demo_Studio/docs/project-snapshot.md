@@ -43,13 +43,16 @@
 │       └── features/
 │           ├── conversation/    ← 对话列表面板 (Panel/Card/Search)
 │           ├── chat/            ← ChatPanel + AgentThinkingChain + QuickActions
+│           ├── animation/       ← MermaidRenderer + SqlSimulator (Stage 3)
 │           ├── flow-editor/     ← 步骤卡片链
-│           └── execution-player/ ← 分步播放 + EXPLAIN 面板
+│           └── execution-player/ ← 分步播放 + EXPLAIN + SQL 模拟器
 │
 ├── packages/
 │   ├── ai-tools/tools.py             ← 8 个工具 + Tool Schema + 规则讲解词
 │   ├── db-engine/connector.py        ← MySQL/PG 连接器 + EXPLAIN
-│   ├── execution-workflow/workflow.py ← 6 阶段 DAG 编排引擎
+│   ├── execution-workflow/
+│   │   ├── workflow.py         ← 6 阶段 DAG 编排引擎
+│   │   └── sql_simulator.py    ← SQL 中间结果表生成 (Stage 3)
 │   └── demo-schema/
 │       ├── schema.json               ← DemoPackage JSON-Schema
 │       ├── validate.py               ← Schema 校验器
@@ -166,8 +169,8 @@ WebSocket:
 | **P1** | 嵌入式测验 Quiz | 每步可出选择题，答题后 AI 解释 | 新增 `features/quiz/QuizPanel.tsx` |
 | **P1** | Redis 集成 | 对话缓存 + 消息缓存 + LLM cache | `apps/api/main.py`, `redis_client.py` |
 | **P1** | 对话历史搜索 | 按知识点/日期搜索历史对话 | `features/conversation/ConversationSearch.tsx` |
-| **P2** | SQL 分步执行模拟器 | FROM→WHERE→SELECT 分步展示中间结果 | 新增 `features/animation/SqlSimulator.tsx` |
-| **P2** | B+树索引动画 | D3.js 实现 B+树插入/查找动画 | 新增 `features/animation/BPlusTreeCanvas.tsx` |
+| ~~P2~~ | ~~SQL 分步执行模拟器~~ | ✅ Stage 3：`SqlSimulator.tsx` + `sql_simulator.py` | 已接入 Player |
+| **P2** | B+树索引动画 | B+树插入/查找动画 | 新增 `features/animation/BPlusTreeCanvas.tsx` (Stage 4) |
 | **P2** | 事务隔离演示器 | 4 种隔离级别对比脏读/不可重复读/幻读 | 新增 `features/animation/TransactionDemo.tsx` |
 | **P2** | 课堂广播 | Redis Pub/Sub 教师→学生端同步 | `ws_handler.py`, `features/student/` |
 | **P2** | 掌握度自适应 | 基于答题+停留时长，AI 建议跳过/展开 | `playbackStore.ts`, `StudentPage.tsx` |

@@ -1,4 +1,4 @@
-// pages/TeacherWorkbenchPage.tsx — 教师主工作台
+// pages/TeacherWorkbenchPage.tsx — 课程知识工作台
 // 三栏布局：ConversationPanel | ChatPanel + FlowEditor | ExecutionPlayer
 
 import { useEffect } from 'react'
@@ -82,7 +82,7 @@ export default function TeacherWorkbenchPage() {
               <span className="text-gray-300 ml-1 text-[10px]">{activeConvId.slice(0, 12)}...</span>
             )}
             {!activeConvId && (
-              <span className="text-gray-400 ml-2">请选择或创建一个对话</span>
+              <span className="text-gray-400 ml-2">请选择或创建一个课程对话</span>
             )}
           </div>
 
@@ -95,7 +95,7 @@ export default function TeacherWorkbenchPage() {
             {/* Flow Editor */}
             <div className="h-48 flex-shrink-0 overflow-hidden">
               <div className="px-4 py-2 border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                步骤编辑器
+                演示编辑器
               </div>
               <div className="h-[calc(100%-36px)] overflow-y-auto">
                 <FlowEditor />

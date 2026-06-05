@@ -25,7 +25,7 @@
 │  │                                                          │   │
 │  │  ┌── ConversationPanel ──┐  ┌── ChatPanel ───────────┐  │   │
 │  │  │  对话列表 + 搜索       │  │  消息流 + 输入 + 快      │  │   │
-│  │  │  多对话 CRUD          │  │  捷操作 + Agent 思维链   │  │   │
+│  │  │  多对话 CRUD          │  │  捷操作 + Agent 轨迹     │  │   │
 │  │  └───────────────────────┘  └────────────────────────┘  │   │
 │  │                                                          │   │
 │  │  ┌── FlowEditor ──────────┐  ┌── ExecutionPlayer ────┐  │   │
@@ -35,7 +35,7 @@
 │  │                                                          │   │
 │  │  ┌── AnimationEngine ─────┐  ┌── QuizPanel ──────────┐  │   │
 │  │  │  Mermaid / D3.js /     │  │  嵌入式测验 + 答题    │  │   │
-│  │  │  ECharts / 执行计划树   │  │  掌握度 + 讲解        │  │   │
+│  │  │  ECharts / 树图 / 模拟器 │  │  掌握度 + 讲解        │  │   │
 │  │  └───────────────────────┘  └────────────────────────┘  │   │
 │  │                                                          │   │
 │  │  ┌── ExportPanel ─────────┐  ┌── StudentLens ───────┐  │   │
@@ -100,10 +100,10 @@
 ├───────────┬──────────────────────────────────────────────┬───────────┤
 │           │                                              │           │
 │  ConversationList │  ┌─ ChatPanel ─────────────────┐    │  Preview  │
-│  (对话列表)      │  │  消息流 (含 Agent 思维链)    │    │   Panel   │
+│  (对话列表)      │  │  消息流 (含 Agent 轨迹)      │    │   Panel   │
 │                  │  │                              │    │           │
 │  ➤ JOIN 查询    │  │  用户: 讲讲 JOIN 查询         │    │  ┌─────┐  │
-│    P1 Mermaid   │  │  AI: [思维链] 调用 sql_analyze│    │  │Player│  │
+│    P1 Mermaid   │  │  AI: [轨迹] 调用知识分析工具  │    │  │Player│  │
 │  对话中 | 3轮    │  │       → explain_mysql → ...  │    │  │      │  │
 │                  │  │  [步骤预览] lex→parse→...    │    │  │进度条│  │
 │  ────────────   │  │                              │    │  │      │  │
@@ -112,7 +112,7 @@
 │  已定稿 | 8轮    │  │  │ 🔊 TTS 试听  📤 导出  │   │    │  └─────┘  │
 │                  │  │  └────────────────────────┘   │    │           │
 │  ────────────   │  │                              │    │           │
-│  事务隔离级别   │  │  [输入 SQL/知识点...] [发送]  │    │           │
+│  事务隔离级别   │  │  [输入知识点/案例/SQL...] [发送]│    │           │
 │    P2 事务      │  └──────────────────────────────┘    │           │
 │  草稿 | 2轮      │                                     │           │
 │                  │  ┌─ FlowEditor ─────────────────┐    │           │
@@ -166,7 +166,7 @@ export default function TeacherWorkbenchPage() {
 │  │  进度条: [■■■■■■■■░░░░] 3/6 步                          │    │
 │  │                                                          │    │
 │  │  ┌─ Visualization ─────────────────────────────────┐     │    │
-│  │  │  Mermaid / D3 B+树 / 执行计划树 / SQL 模拟器    │     │    │
+│  │  │  Mermaid / D3 B+树 / 树图 / 过程模拟器          │     │    │
 │  │  └─────────────────────────────────────────────────┘     │    │
 │  │                                                          │    │
 │  │  ┌─ Narration ─────────────────────────────────────┐     │    │
@@ -198,9 +198,9 @@ export default function TeacherWorkbenchPage() {
 │                                                              │
 │  ┌─ Quiz ──────────────────────────────────────────────┐   │
 │  │  ✅ 这步你掌握了吗？                                  │   │
-│  │  这条 SQL 用到了几个关键字？                          │   │
+│  │  这条知识点演示对应了哪些关键步骤？                  │   │
 │  │  ○ 2  ○ 3  ● 4  ○ 5                               │   │
-│  │  ✅ 正确！"SELECT、FROM、JOIN、ON 共 4 个..."        │   │
+│  │  ✅ 正确！你已经识别出关键步骤链路。                │   │
 │  └──────────────────────────────────────────────────────┘   │
 │                                                              │
 │  ┌─ AI Tutor ───────────────────────────────────────────┐   │
@@ -240,8 +240,8 @@ src/
 │   ├── chat/
 │   │   ├── ChatPanel.tsx             # 消息流 + 输入区
 │   │   ├── MessageBubble.tsx         # 单条消息 (user/assistant/system)
-│   │   ├── AgentThinkingChain.tsx    # Agent 思维链展示
-│   │   ├── ChatInput.tsx             # 多模态输入 (text/sql/image)
+│   │   ├── AgentThinkingChain.tsx    # Agent 轨迹展示
+│   │   ├── ChatInput.tsx             # 多模态输入 (text/sql/image/knowledge)
 │   │   ├── QuickActions.tsx          # 快捷操作面板
 │   │   └── DemoSnapshotIndicator.tsx # 当前演示快照版本
 │   │
@@ -255,17 +255,17 @@ src/
 │   │   ├── ExecutionPlayer.tsx       # 主播放器
 │   │   ├── ProgressBar.tsx           # 步骤进度条
 │   │   ├── PlaybackControls.tsx      # 播放控制 (◀ ▶ ▶ ▶)
-│   │   ├── PhasePanel.tsx            # 阶段 EXPLAIN 面板
-│   │   ├── CostCompareCards.tsx      # MySQL vs PG 代价对比
+│   │   ├── PhasePanel.tsx            # 阶段演示面板
+│   │   ├── CostCompareCards.tsx      # 多策略证据对比
 │   │   └── NarrationBox.tsx          # 讲解词 + TTS 按钮
 │   │
 │   ├── animation/
 │   │   ├── AnimationEngine.tsx       # 动画引擎调度
 │   │   ├── MermaidRenderer.tsx       # Mermaid 渲染
 │   │   ├── BPlusTreeCanvas.tsx       # D3.js B+树动画
-│   │   ├── SqlSimulator.tsx          # SQL 分步执行模拟器
+│   │   ├── SqlSimulator.tsx          # SQL / 过程分步模拟器
 │   │   ├── TransactionDemo.tsx       # 事务隔离级别演示
-│   │   └── ExecutionPlanTree.tsx     # 可视化执行计划树
+│   │   └── ExecutionPlanTree.tsx     # 可视化推理/执行树
 │   │
 │   ├── quiz/
 │   │   ├── QuizPanel.tsx             # 嵌入式测验
@@ -463,7 +463,7 @@ useWebSocket.send({type:'chat:message', convId, content: {text, sql?}})
         ▼  流式推送回前端
 useWebSocket.onMessage ──事件类型路由──→
         │
-        ├── 'agent:thinking' → ChatPanel 展示 Agent 思维链
+        ├── 'agent:thinking' → ChatPanel 展示 Agent 轨迹
         │     DemoSnapshotIndicator 更新 "生成中..."
         │
         ├── 'step:preview'   → FlowEditor 新增步骤卡片
@@ -642,6 +642,7 @@ interface Message {
 interface MessageContent {
   text?: string
   sql?: string
+  knowledge?: string
   imageUrl?: string
   toolCalls?: ToolCall[]
   demoSnapshotId?: string

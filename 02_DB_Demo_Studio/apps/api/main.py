@@ -14,7 +14,7 @@ apps/api — FastAPI 后端
   GET    /api/conversations/{id}/messages  消息历史
 
   # 演示
-  POST   /api/ai/chat                  SSE 流式对话（向后兼容）
+  POST   /api/ai/chat                  SSE 流式课程对话（向后兼容）
   GET    /api/demos/{demo_id}          获取演示
 
   # WebSocket（核心）
@@ -38,25 +38,30 @@ from dotenv import load_dotenv
 from typing import Optional
 
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))          # apps/api/
-_STUDIO_DIR = os.path.dirname(os.path.dirname(_APP_DIR))       # apps/ 或项目根
-_STUDIO_ROOT = os.path.dirname(_STUDIO_DIR)                    # 项目根
+_STUDIO_ROOT = os.path.dirname(os.path.dirname(_APP_DIR))   # 02_DB_Demo_Studio/
 
-# Load .env — 可能在 _STUDIO_ROOT 也可能在 _STUDIO_DIR（本地 vs Docker）
+# Load .env — Docker 工作目录为 /app，本地为项目根
 _env_path = os.path.join(_STUDIO_ROOT, ".env")
 if not os.path.exists(_env_path):
-    _env_path = os.path.join(_STUDIO_DIR, ".env")
+    _env_path = os.path.join(os.path.dirname(_STUDIO_ROOT), ".env")
 load_dotenv(_env_path)
 
-# 让 api 引用同仓库的 packages
+# 让 api 引用同仓库的 packages（Docker: /app/packages；本地: 02_DB_Demo_Studio/packages）
+_packages_root = _STUDIO_ROOT if os.path.isdir(os.path.join(_STUDIO_ROOT, "packages")) else os.path.dirname(_STUDIO_ROOT)
 for pkg in ["ai-tools", "db-engine", "execution-workflow"]:
-    sys.path.insert(0, os.path.join(_STUDIO_ROOT, "packages", pkg))
+    sys.path.insert(0, os.path.join(_packages_root, "packages", pkg))
 
 from tools import (
     sql_analyze, explain_mysql, explain_postgres,
     assemble_execution_steps, validate_demo_package,
     generate_narration, TOOL_MAP, TOOL_SCHEMAS,
 )
-from apps.api.redis_client import ping as redis_ping, cache_message, get_cached_messages
+from sql_simulator import build_sql_simulator
+
+try:
+    from redis_client import ping as redis_ping, cache_message, get_cached_messages
+except ImportError:
+    from apps.api.redis_client import ping as redis_ping, cache_message, get_cached_messages
 
 app = FastAPI(title="DB Demo Studio API", version="5.0")
 
@@ -79,7 +84,7 @@ messages: dict[str, list] = {}  # convId -> list of messages
 conversation_order: list = []  # sorted list of convIds by recency
 
 
-def _create_conv(title: str = "新对话") -> dict:
+def _create_conv(title: str = "新课程对话") -> dict:
     conv_id = f"conv_{uuid.uuid4().hex[:12]}"
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     conv = {
@@ -99,7 +104,7 @@ def _create_conv(title: str = "新对话") -> dict:
 
 
 # Create a default conversation
-_create_conv("JOIN 查询讲解")
+_create_conv("数据库课程知识讲解")
 
 
 # ═══════════════════════════════════════════════
@@ -122,7 +127,7 @@ def _normalize_plan(raw: dict) -> dict | None:
 
 
 def _build_demo_from_sql(sql: str, message: str = "", curriculum_node: str = None) -> dict:
-    """SQL + 对话 → DemoPackage"""
+    """知识点/SQL + 对话 → DemoPackage"""
     analysis = sql_analyze(sql)
     mysql_exp = explain_mysql(sql)
     pg_exp = explain_postgres(sql)
@@ -150,17 +155,27 @@ def _build_demo_from_sql(sql: str, message: str = "", curriculum_node: str = Non
         if step["workflowPhase"] in ("plan", "execute"):
             step["enginePlan"] = {"mysql": mysql_plan, "postgres": pg_plan}
 
+    sim_data = build_sql_simulator(sql, analysis)
+    simulation_data = {}
+    if sim_data.get("steps"):
+        simulation_data["sqlSimulator"] = sim_data
+        for step in steps:
+            if step.get("workflowPhase") in ("execute", "result"):
+                vis = step.setdefault("visuals", {})
+                if not vis.get("type") or vis.get("type") == "highlight-sql":
+                    vis["type"] = "simulator-step"
+
     dp = {
         "id": f"dp_{abs(hash(sql)) % 10**8:08d}",
         "version": 4,
         "title": {
-            "zh": (curriculum_node or "SQL 演示") + " 执行过程",
-            "en": (curriculum_node or "SQL Demo") + " Execution",
+            "zh": (curriculum_node or "课程演示") + " 执行过程",
+            "en": (curriculum_node or "Course Demo") + " Execution",
         },
         "steps": steps,
         "workflowTrace": {
             "workflowId": ir_result.get("workflow_id", ""),
-            "workflowType": "sql-execution",
+            "workflowType": "course-demonstration",
             "aiSessionId": "session_001",
         },
         "engineCompare": {
@@ -174,6 +189,8 @@ def _build_demo_from_sql(sql: str, message: str = "", curriculum_node: str = Non
         },
         "playback": {"defaultStepDurationMs": 5000},
     }
+    if simulation_data:
+        dp["simulationData"] = simulation_data
 
     v_result = validate_demo_package(dp)
     dp["_validation"] = {"valid": v_result["valid"], "errors": v_result.get("errors")}
@@ -211,7 +228,7 @@ async def list_conversations(search: Optional[str] = None):
 
 @app.post("/api/conversations")
 async def create_conversation(body: dict):
-    title = body.get("title", "新对话")
+    title = body.get("title", "新课程对话")
     conv = _create_conv(title)
     return conversations[conv["id"]]
 
@@ -274,17 +291,17 @@ async def chat_sse(body: dict):
 
     async def generate():
         try:
-            yield f"data: {json.dumps({'type': 'assistant-text', 'content': '正在分析 SQL 并生成执行计划...'})}\n\n"
+            yield f"data: {json.dumps({'type': 'assistant:text', 'content': '正在分析知识点并生成演示...'})}\n\n"
             await asyncio.sleep(0.1)
 
             dp = _build_demo_from_sql(sql, message, curriculum_node)
 
             for step in dp.get("steps", []):
-                yield f"data: {json.dumps({'type': 'step-preview', 'step': step})}\n\n"
+                yield f"data: {json.dumps({'type': 'demo:step_preview', 'step': step})}\n\n"
                 await asyncio.sleep(0.05)
 
-            yield f"data: {json.dumps({'type': 'demo-updated', 'demo': dp})}\n\n"
-            yield f"data: {json.dumps({'type': 'demo-complete', 'demo_id': dp['id']})}\n\n"
+            yield f"data: {json.dumps({'type': 'demo:updated', 'demo': dp})}\n\n"
+            yield f"data: {json.dumps({'type': 'demo:complete', 'demo_id': dp['id']})}\n\n"
 
         except Exception as e:
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
@@ -314,15 +331,15 @@ async def get_demo(demo_id: str):
 connected_rooms: dict[str, set] = {}  # convId -> set of WebSocket connections
 
 
-async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id: str) -> str:
+async def _ws_handle_message(ws: WebSocket, data: dict, teacherId: str, convId: str) -> str:
     """Handle incoming WebSocket message"""
     msg_type = data.get("type", "")
 
     if msg_type == "ping":
         await ws.send_text(json.dumps({"type": "pong"}))
-        return conv_id
+        return convId
 
-    elif msg_type == "chat:message":
+    elif msg_type == "conversation:message":
         content = data.get("content", {})
         text = content.get("text", "")
         sql = content.get("sql", "")
@@ -330,31 +347,31 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
         # Store user message
         user_msg = {
             "id": f"msg_{uuid.uuid4().hex[:10]}",
-            "convId": conv_id,
+            "convId": convId,
             "role": "user",
             "type": "text",
             "content": {"text": text, "sql": sql or None},
             "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
-        msgs = messages.setdefault(conv_id, [])
+        msgs = messages.setdefault(convId, [])
         msgs.append(user_msg)
-        if conv_id in conversations:
-            conversations[conv_id]["messageCount"] = len(msgs)
+        if convId in conversations:
+            conversations[convId]["messageCount"] = len(msgs)
 
         try:
-            await cache_message(conv_id, user_msg)
+            await cache_message(convId, user_msg)
         except Exception:
             pass
 
         # Send thinking indicator
         await ws.send_text(json.dumps({
-            "type": "agent:thinking", "convId": conv_id,
+            "type": "assistant:trace", "convId": convId,
             "content": "正在分析..."
         }))
 
         await asyncio.sleep(0.1)
         await ws.send_text(json.dumps({
-            "type": "agent:thinking", "convId": conv_id,
+            "type": "assistant:trace", "convId": convId,
             "content": "调用工具链..."
         }))
         await asyncio.sleep(0.05)
@@ -378,39 +395,39 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
                 # Stream step previews
                 for i, step in enumerate(dp.get("steps", [])):
                     await ws.send_text(json.dumps({
-                        "type": "step:preview", "convId": conv_id,
+                        "type": "demo:step_preview", "convId": convId,
                         "step": step, "order": i + 1,
                     }))
                     await asyncio.sleep(0.03)
 
                 # Build reply text
                 steps = dp.get("steps", [])
-                reply_text = f"已生成 {len(steps)} 步演示：\n\n"
+                reply_text = f"已生成 {len(steps)} 步课程演示：\n\n"
                 for i, s in enumerate(steps):
                     label = s.get("workflowPhase", "")
                     zh = s.get("narration", {}).get("zh", "")
                     reply_text += f"【{i+1}. {label}】{zh[:60]}...\n"
 
                 await ws.send_text(json.dumps({
-                    "type": "demo:complete", "convId": conv_id,
+                    "type": "demo:complete", "convId": convId,
                     "demo": dp, "demo_id": dp["id"],
                 }))
 
             else:
-                # Non-SQL: concept mode
-                reply_text = f"关于「{text}」的知识点讲解：\n\n这是数据库课程中的重要概念。建议使用 Mermaid 可视化或 SQL 示例来辅助理解。你可以粘贴相关 SQL 来生成执行演示。"
+                # Non-SQL: course knowledge mode
+                reply_text = f"关于「{text}」的课程知识讲解：\n\n这是数据库课程中的重要概念。建议使用 Mermaid 可视化、树图或 SQL 示例来辅助理解。你可以继续补充案例，系统会生成对应的演示。"
                 dp = None
 
             # Push assistant text reply (so it appears in chat)
             await ws.send_text(json.dumps({
-                "type": "assistant-text", "convId": conv_id,
+                "type": "assistant:text", "convId": convId,
                 "content": reply_text,
             }))
 
             # Store and send assistant message
             assistant_msg = {
                 "id": f"msg_{uuid.uuid4().hex[:10]}",
-                "convId": conv_id,
+                "convId": convId,
                 "role": "assistant",
                 "type": "demo_snapshot" if dp else "text",
                 "content": {
@@ -422,12 +439,12 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
             msgs.append(assistant_msg)
 
             await ws.send_text(json.dumps({
-                "type": "conv:new_message", "convId": conv_id,
+                "type": "conversation:new_message", "convId": convId,
                 "message": assistant_msg,
             }))
 
             try:
-                await cache_message(conv_id, assistant_msg)
+                await cache_message(convId, assistant_msg)
             except Exception:
                 pass
 
@@ -435,29 +452,29 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
             import traceback
             traceback.print_exc()
             await ws.send_text(json.dumps({
-                "type": "error", "convId": conv_id,
+                "type": "error", "convId": convId,
                 "message": str(e),
             }))
-        return conv_id
+        return convId
 
-    elif msg_type == "conv:switch":
+    elif msg_type == "conversation:switch":
         new_conv_id = data.get("convId", "")
         if new_conv_id in conversations:
             # Move connection to the target room and update active conv for this socket
-            room = connected_rooms.setdefault(conv_id, set())
+            room = connected_rooms.setdefault(convId, set())
             room.discard(ws)
             connected_rooms.setdefault(new_conv_id, set()).add(ws)
 
             await ws.send_text(json.dumps({
-                "type": "conv:loaded",
+                "type": "conversation:loaded",
                 "convId": new_conv_id,
                 "messages": messages.get(new_conv_id, []),
                 "currentDemo": None,
             }))
             return new_conv_id
-        return conv_id
+        return convId
 
-    elif msg_type == "conv:delete":
+    elif msg_type == "conversation:delete":
         cid = data.get("convId", "")
         if cid in conversations:
             del conversations[cid]
@@ -466,26 +483,26 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
             if cid in conversation_order:
                 conversation_order.remove(cid)
             # Notify room
-            room = connected_rooms.setdefault(conv_id, set())
+            room = connected_rooms.setdefault(convId, set())
             for client in room:
                 try:
                     await client.send_text(json.dumps({
-                        "type": "conv:deleted", "convId": cid,
+                        "type": "conversation:deleted", "convId": cid,
                     }))
                 except Exception:
                     pass
-        return conv_id
+        return convId
 
-    elif msg_type == "conv:clear_messages":
+    elif msg_type == "conversation:clear_messages":
         cid = data.get("convId", "")
         if cid in messages:
             messages[cid] = []
         if cid in conversations:
             conversations[cid]["messageCount"] = 0
         await ws.send_text(json.dumps({
-            "type": "conv:cleared", "convId": cid,
+            "type": "conversation:cleared", "convId": cid,
         }))
-        return conv_id
+        return convId
 
     elif msg_type == "message:delete":
         cid = data.get("convId", "")
@@ -497,50 +514,50 @@ async def _ws_handle_message(ws: WebSocket, data: dict, teacher_id: str, conv_id
         await ws.send_text(json.dumps({
             "type": "message:deleted", "convId": cid, "msgId": msg_id,
         }))
-        return conv_id
+        return convId
 
     elif msg_type == "player:seek":
         # Broadcast to room
-        room = connected_rooms.setdefault(conv_id, set())
+        room = connected_rooms.setdefault(convId, set())
         for client in room:
             try:
                 await client.send_text(json.dumps({
                     "type": "player:sync",
-                    "convId": conv_id,
+                    "convId": convId,
                     "stepIndex": data.get("stepIndex", 0),
                 }))
             except Exception:
                 pass
 
-    return conv_id
+    return convId
 
 
 @app.websocket("/ws/chat")
-async def ws_chat(ws: WebSocket, teacher_id: str = "local", conv_id: str = ""):
+async def ws_chat(ws: WebSocket, teacherId: str = "local", convId: str = ""):
     await ws.accept()
 
     # Ensure conversation exists
-    if conv_id not in conversations:
-        conv = _create_conv("新对话")
-        conv_id = conv["id"]
+    if convId not in conversations:
+        conv = _create_conv("新课程对话")
+        convId = conv["id"]
 
     # Register in room
-    room = connected_rooms.setdefault(conv_id, set())
+    room = connected_rooms.setdefault(convId, set())
     room.add(ws)
 
     try:
         # Send initial state
         await ws.send_text(json.dumps({
-            "type": "conv:loaded",
-            "convId": conv_id,
-            "messages": messages.get(conv_id, []),
+            "type": "conversation:loaded",
+            "convId": convId,
+            "messages": messages.get(convId, []),
             "currentDemo": None,
         }))
 
         # Send conversation list
         conv_list = [conversations[cid] for cid in conversation_order if cid in conversations]
         await ws.send_text(json.dumps({
-            "type": "conv:list",
+            "type": "conversation:list",
             "conversations": conv_list,
         }))
 
@@ -553,7 +570,7 @@ async def ws_chat(ws: WebSocket, teacher_id: str = "local", conv_id: str = ""):
                     if data.get("type") == "ping":
                         await ws.send_text(json.dumps({"type": "pong"}))
                     else:
-                        conv_id = await _ws_handle_message(ws, data, teacher_id, conv_id)
+                        convId = await _ws_handle_message(ws, data, teacherId, convId)
                 except json.JSONDecodeError:
                     pass
             else:

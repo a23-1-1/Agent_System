@@ -16,7 +16,7 @@ export function ChatHeader({ conv, showSearch, onToggleSearch }: Props) {
   if (!conv) {
     return (
       <div className="px-4 py-2 border-b border-gray-100 text-xs font-medium text-gray-400">
-        选择一个对话开始
+        选择一个课程对话开始
       </div>
     )
   }
@@ -49,7 +49,7 @@ export function ChatHeader({ conv, showSearch, onToggleSearch }: Props) {
         </button>
         <button
           onClick={() => {
-            if (conv.messageCount > 0 && confirm(`清空「${conv.title}」的所有消息？`)) {
+            if (conv.messageCount > 0 && confirm(`清空「${conv.title}」的所有课程消息？`)) {
               clearMessages(conv.id)
             }
           }}

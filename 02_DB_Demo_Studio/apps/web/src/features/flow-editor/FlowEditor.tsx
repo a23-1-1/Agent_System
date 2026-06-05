@@ -11,7 +11,7 @@ export function FlowEditor() {
       <div className="flex-1 flex items-center justify-center text-gray-300 text-sm">
         <div className="text-center">
           <div className="text-4xl mb-2 opacity-50">?</div>
-          在左侧 AI Studio 输入要讲的知识点<br/>或直接粘贴 SQL
+          在左侧 AI Studio 输入要讲的知识点<br/>或直接粘贴案例、SQL
         </div>
       </div>
     )
@@ -45,7 +45,7 @@ export function FlowEditor() {
 
 function StepCard({ step, index }: { step: any; index: number }) {
   const labels: Record<string, string> = {
-    lex: '词法分析', parse: '语法分析', optimize: '查询优化',
+    lex: '词法分析', parse: '语法分析', optimize: '策略选择',
     plan: '执行计划', execute: '执行过程', result: '结果集',
     concept: '概念', transform: '变换', compare: '对比', summary: '总结',
   }
@@ -66,7 +66,7 @@ function StepCard({ step, index }: { step: any; index: number }) {
       </div>
       {step.groundingRef && (
         <div className="mt-1.5 text-[10px] text-green-600 bg-green-50 rounded px-1.5 py-0.5 inline-block">
-          EXPLAIN grounded
+          有证据
         </div>
       )}
     </div>

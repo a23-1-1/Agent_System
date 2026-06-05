@@ -63,7 +63,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       const resp = await fetch('/api/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title || '新对话' }),
+        body: JSON.stringify({ title: title || '新课程对话' }),
       })
       if (resp.ok) {
         const data = await resp.json()
@@ -181,37 +181,37 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
   handleServerEvent: (event) => {
     const store = get()
     switch (event.type) {
-      case 'conv:list':
+      case 'conversation:list':
         set({ conversations: event.conversations })
         break
-      case 'conv:loaded':
+      case 'conversation:loaded':
         set({
           messages: event.messages,
           activeConvId: event.convId,
           loading: false,
         })
         break
-      case 'conv:created':
+      case 'conversation:created':
         set(s => ({
           conversations: [event.conversation, ...s.conversations],
         }))
         break
-      case 'conv:deleted':
+      case 'conversation:deleted':
         set(s => ({
           conversations: s.conversations.filter(c => c.id !== event.convId),
         }))
         break
-      case 'assistant-text':
+      case 'assistant:text':
         if (event.convId === store.activeConvId) {
           store.appendStreamChunk(event.convId, event.content)
         }
         break
-      case 'agent:thinking':
+      case 'assistant:trace':
         if (event.convId === store.activeConvId) {
-          store.appendStreamChunk(event.convId, `\n[思考] ${event.content}`)
+          store.appendStreamChunk(event.convId, `\n[轨迹] ${event.content}`)
         }
         break
-      case 'conv:new_message':
+      case 'conversation:new_message':
         if (event.convId === store.activeConvId) {
           set(s => ({ messages: [...s.messages, event.message] }))
           if (event.message.role === 'assistant') {
@@ -222,7 +222,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       case 'demo:complete':
         if (event.convId === store.activeConvId) {
           store.setGenerationStatus('idle')
-          store.updateConversationSummary(event.convId, event.demo?.title?.zh || '已生成回复')
+          store.updateConversationSummary(event.convId, event.demo?.title?.zh || '已生成课程演示')
         }
         break
       case 'error':
